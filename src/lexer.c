@@ -97,7 +97,8 @@ token_T* next_token(lexer_T* lexer)
       case ';': return current_character(lexer, TOKEN_SEMI);
       case '(': return current_character(lexer, TOKEN_LPAREN);
       case ')': return current_character(lexer, TOKEN_RPAREN);
-      default: printf("[Lexer]: Unexpected character '%c'\n", lexer->c); advance(lexer);
+      case '\0': break;
+      default: printf("[Lexer]: Unexpected character '%c'\n", lexer->c); exit(1); break;
     }
   }
 
