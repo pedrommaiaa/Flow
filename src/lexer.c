@@ -16,10 +16,13 @@ token_T* init_token(char* value, int type)
 lexer_T* init_lexer(char* code)
 {
   lexer_T* lexer = calloc(1, sizeof(struct LEXER));
+  
   lexer->code = code; // raw code
   lexer->len_code = strlen(code); // len code
-  lexer->i = 0; // index
-  lexer->c = code[lexer->i]; // current character
+  
+  lexer->char_index = 0; // index
+  lexer->line_n = 1; // index
+  lexer->current_char = lexer->code[lexer->char_index]; // current character
 
   return lexer; 
 }
@@ -27,10 +30,21 @@ lexer_T* init_lexer(char* code)
 
 void advance(lexer_T* lexer)
 {
-  if (lexer->i < lexer->len_code && lexer->c != '\0')
+  if (lexer->current_char == '\n' || lexer->current_char == 10)
   {
-    lexer->i += 1;
-    lexer->c = lexer->code[lexer->i];
+    lexer->line_n += 1;
+  }
+  
+  
+  if (lexer->char_index < lexer->len_code && lexer->current_char != '\0')
+  {
+    lexer->char_index += 1;
+    lexer->current_char = lexer->code[lexer->char_index];
+  }
+
+  else
+  {
+    lexer->current_char = '\0';
   }
 }
 
@@ -39,10 +53,10 @@ token_T* lexer_number(lexer_T* lexer)
 {
   char* value = calloc(1, sizeof(char));
   
-  while (isdigit(lexer->c))
+  while (isdigit(lexer->current_char))
   {
     value = realloc(value, (strlen(value) + 2) * sizeof(char));
-    strcat(value, (char[]){lexer->c, 0});
+    strcat(value, (char[]){lexer->current_char, 0});
     advance(lexer);
   }
   return init_token(value, TOKEN_INT);
@@ -52,10 +66,10 @@ token_T* lexer_number(lexer_T* lexer)
 token_T* lexer_id(lexer_T* lexer)
 {
   char* value = calloc(1, sizeof(char));
-  while (isalpha(lexer->c))
+  while (isalpha(lexer->current_char))
   {
     value = realloc(value, (strlen(value) + 2) * sizeof(char));
-    strcat(value, (char[]){lexer->c, 0});
+    strcat(value, (char[]){lexer->current_char, 0});
     advance(lexer); 
   }
   return init_token(value, TOKEN_ID); 
@@ -67,10 +81,15 @@ token_T* lexer_string(lexer_T* lexer)
   char* value = calloc(1, sizeof(char));
   advance(lexer);
 
-  while (lexer->c != '"')
+  while (lexer->current_char != '"')
   {
+    if (lexer->current_char == '\0')
+    {
+      printf("[Line %d] Missing closing quotation mark\n", lexer->line_n); exit(1);
+    }
+    
     value = realloc(value, (strlen(value) + 2) * sizeof(char));
-    strcat(value, (char[]){lexer->c, 0});
+    strcat(value, (char[]){lexer->current_char, 0});
     advance(lexer);
   }
   
@@ -94,7 +113,7 @@ token_T* lexer_string(lexer_T* lexer)
 token_T* current_character(lexer_T* lexer, int type)
 {
   char* value = calloc(2, sizeof(char));
-  value[0] = lexer->c;
+  value[0] = lexer->current_char;
   value[1] = '\0'; 
   token_T* token = init_token(value, type);
   advance(lexer);
@@ -105,24 +124,24 @@ token_T* current_character(lexer_T* lexer, int type)
 
 token_T* next_token(lexer_T* lexer)
 {
-  while (lexer->c != '\0')
+  while (lexer->current_char != '\0')
   {
-    while (lexer->c == ' ' || lexer->c == '\n' || lexer->c == 10)
+    while (lexer->current_char == ' ' || lexer->current_char == '\n' || lexer->current_char == 10)
     {
       advance(lexer);
     }
     
-    if (isalpha(lexer->c))
+    if (isalpha(lexer->current_char))
     {
       return lexer_id(lexer);
     }
 
-    if (isdigit(lexer->c))
+    if (isdigit(lexer->current_char))
     {
       return lexer_number(lexer);
     }
     
-    switch (lexer->c)
+    switch (lexer->current_char)
     {
       case '=': return current_character(lexer, TOKEN_EQUAL);
       case ';': return current_character(lexer, TOKEN_SEMI);
@@ -132,7 +151,7 @@ token_T* next_token(lexer_T* lexer)
       case '}': return current_character(lexer, TOKEN_RBRACE);
       case '"': return lexer_string(lexer);
       case '\0': break;
-      default: printf("[Lexer]: Unexpected character '%c', ASCII number: %d\n", lexer->c, (int)lexer->c); exit(1); break;
+      default: printf("[Line %d]: Unexpected character '%c', ASCII number: %d\n", lexer->line_n, lexer->current_char, (int)lexer->current_char); exit(1); break;
     }
   }
 
@@ -159,13 +178,13 @@ const char* token_kind_to_str(int type)
   return "Token kind not stringable.\n";
 }
 
-char* token_to_str(token_T* token)
+char* token_to_str(token_T* token, lexer_T* lexer)
 {
   const char* kind_str = token_kind_to_str(token->type);
   const char* template = " %s -> %s  line: (%d)\n";
 
   char* str = calloc(strlen(kind_str) + strlen(template) + 12, sizeof(char));
-  sprintf(str, template, kind_str, token->value, 0);
+  sprintf(str, template, kind_str, token->value, lexer->line_n);
 
   return str;
 }

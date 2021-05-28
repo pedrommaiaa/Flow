@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 
   while ((token = next_token(lexer))->type != TOKEN_EOF)
   {    
-    printf("%s", token_to_str(token));
+    printf("%s", token_to_str(token, lexer));
   }
 
   free(contents); 
