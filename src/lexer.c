@@ -107,7 +107,7 @@ token_T* next_token(lexer_T* lexer)
 {
   while (lexer->c != '\0')
   {
-    if (lexer->c == ' ' || lexer->c == '\n')
+    while (lexer->c == ' ' || lexer->c == '\n' || lexer->c == 10)
     {
       advance(lexer);
     }
@@ -128,9 +128,11 @@ token_T* next_token(lexer_T* lexer)
       case ';': return current_character(lexer, TOKEN_SEMI);
       case '(': return current_character(lexer, TOKEN_LPAREN);
       case ')': return current_character(lexer, TOKEN_RPAREN);
+      case '{': return current_character(lexer, TOKEN_LBRACE);
+      case '}': return current_character(lexer, TOKEN_RBRACE);
       case '"': return lexer_string(lexer);
       case '\0': break;
-      default: printf("[Lexer]: Unexpected character '%c' (%d)\n", lexer->c, (int)lexer->c); exit(1); break;
+      default: printf("[Lexer]: Unexpected character '%c', ASCII number: %d\n", lexer->c, (int)lexer->c); exit(1); break;
     }
   }
 
@@ -149,8 +151,21 @@ const char* token_kind_to_str(int type)
     case TOKEN_SEMI: return "TOKEN_SEMI";
     case TOKEN_LPAREN: return "TOKEN_LPAREN";
     case TOKEN_RPAREN: return "TOKEN_RPAREN";
+    case TOKEN_LBRACE: return "TOKEN_LBRACE";
+    case TOKEN_RBRACE: return "TOKEN_RBRACE";
     case TOKEN_EOF: return "TOKEN_EOF";
   }
 
   return "Token kind not stringable.\n";
+}
+
+char* token_to_str(token_T* token)
+{
+  const char* kind_str = token_kind_to_str(token->type);
+  const char* template = " %s -> %s  line: (%d)\n";
+
+  char* str = calloc(strlen(kind_str) + strlen(template) + 12, sizeof(char));
+  sprintf(str, template, kind_str, token->value, 0);
+
+  return str;
 }

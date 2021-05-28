@@ -1,2 +1,6 @@
-string name = "Pedro Maia";
-print(name);
+int main() {  
+  string name = "Pedro Maia";
+  print(name);
+  
+  return 0;
+}

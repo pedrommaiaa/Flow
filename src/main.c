@@ -22,8 +22,7 @@ int main(int argc, char* argv[])
 
   while ((token = next_token(lexer))->type != TOKEN_EOF)
   {    
-    const char* kind_str = token_kind_to_str(token->type);
-    printf("%s -> %s\n", kind_str, token->value);
+    printf("%s", token_to_str(token));
   }
 
   free(contents); 

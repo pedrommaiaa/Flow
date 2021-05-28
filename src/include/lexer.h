@@ -12,6 +12,8 @@ typedef struct TOKEN
     TOKEN_SEMI,
     TOKEN_LPAREN,
     TOKEN_RPAREN,
+    TOKEN_LBRACE,
+    TOKEN_RBRACE,
     TOKEN_EOF
   } type;
 } token_T;
@@ -27,6 +29,7 @@ typedef struct LEXER
 
 token_T* init_token(char* value, int type);
 const char* token_kind_to_str(int type);
+char* token_to_str(token_T* token);
 
 
 lexer_T* init_lexer(char* code);
