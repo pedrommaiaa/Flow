@@ -1,2 +1,2 @@
-int number = 32;
-print(number);
+string name = "Pedro Maia";
+print(name);

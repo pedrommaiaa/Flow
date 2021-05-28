@@ -8,6 +8,7 @@ typedef struct TOKEN
     TOKEN_ID,
     TOKEN_EQUAL,
     TOKEN_INT,
+    TOKEN_STRING,
     TOKEN_SEMI,
     TOKEN_LPAREN,
     TOKEN_RPAREN,
@@ -32,5 +33,6 @@ lexer_T* init_lexer(char* code);
 void lexer_advance(lexer_T* lexer);
 token_T* lexer_number(lexer_T* lexer);
 token_T* lexer_id(lexer_T* lexer);
+token_T* lexer_string(lexer_T* lexer);
 token_T* current_character(lexer_T* lexer, int type);
 token_T* next_token(lexer_T* lexer);
