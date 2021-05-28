@@ -21,7 +21,7 @@ void parser_type_error(parser_T* parser);
 
 void parser_syntax_error(parser_T* parser);
 
-void parser_unexpected_token(parser_T* parser, int token_type);
+void parser_unexpected_token_error(parser_T* parser, int token_type);
 
 AST_T* parser_parse(parser_T* parser);
 

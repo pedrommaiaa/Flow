@@ -35,11 +35,14 @@ typedef struct LEXER
 token_T* init_token(char* value, int type);
 const char* token_kind_to_str(int type);
 char* token_to_str(token_T* token, lexer_T* lexer);
+void token_free(token_T* token);
 
 
 lexer_T* init_lexer(char* code);
 void lexer_free(lexer_T* lexer);
 void advance(lexer_T* lexer);
+void expect_char(lexer_T* lexer, char c);
+char* current_char_as_str(lexer_T* lexer);
 token_T* lexer_number(lexer_T* lexer);
 token_T* lexer_id(lexer_T* lexer);
 token_T* lexer_string(lexer_T* lexer);

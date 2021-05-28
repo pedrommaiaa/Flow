@@ -27,6 +27,12 @@ lexer_T* init_lexer(char* code)
   return lexer; 
 }
 
+void token_free(token_T* token)
+{
+  free(token->value);
+  free(token);
+}
+
 
 void advance(lexer_T* lexer)
 {
@@ -48,25 +54,38 @@ void advance(lexer_T* lexer)
   }
 }
 
+void expect_char(lexer_T* lexer, char c)
+{
+  if (lexer->current_char != c)
+  {
+    printf("Error: [Line %d] Lexer expected the current char to be '%c', but it was '%c'.", lexer->line_n, c, lexer->current_char);
+    exit(1);
+  }
+}
 
 token_T* lexer_number(lexer_T* lexer)
 {
-  char* value = calloc(1, sizeof(char));
-  
+
+  char* buffer = calloc(1, sizeof(char));
+  buffer[0] = '\0';
+
   while (isdigit(lexer->current_char))
   {
-    value = realloc(value, (strlen(value) + 2) * sizeof(char));
-    strcat(value, (char[]){lexer->current_char, 0});
+    char* strchar = current_char_as_str(lexer);
+    buffer = realloc(buffer, strlen(buffer) + 2);
+    strcat(buffer, strchar);
+    free(strchar);
+     
     advance(lexer);
   }
-  return init_token(value, TOKEN_INT);
+  return init_token(buffer, TOKEN_INT);
 }
 
 
 token_T* lexer_id(lexer_T* lexer)
 {
   char* value = calloc(1, sizeof(char));
-  while (isalpha(lexer->current_char))
+  while (isalnum(lexer->current_char) || lexer->current_char == '_')
   {
     value = realloc(value, (strlen(value) + 2) * sizeof(char));
     strcat(value, (char[]){lexer->current_char, 0});
@@ -78,35 +97,45 @@ token_T* lexer_id(lexer_T* lexer)
 
 token_T* lexer_string(lexer_T* lexer)
 {
-  char* value = calloc(1, sizeof(char));
+  expect_char(lexer, '"');
   advance(lexer);
+
+  size_t initial_index = lexer->char_index;
 
   while (lexer->current_char != '"')
   {
     if (lexer->current_char == '\0')
     {
-      printf("[Line %d] Missing closing quotation mark\n", lexer->line_n); exit(1);
+      printf("[Line %d] Missing closing quotation mark\n.", lexer->line_n); exit(1);
     }
     
-    value = realloc(value, (strlen(value) + 2) * sizeof(char));
-    strcat(value, (char[]){lexer->current_char, 0});
     advance(lexer);
   }
   
+  size_t length = lexer->char_index - initial_index + 1;
+  char* buffer = calloc(length, sizeof(char));
+  memcpy(buffer, &lexer->code[initial_index], length);
+  buffer[length - 1] = '\0';
+  
   advance(lexer);
+  
+  /* format to string */
   char* formatted = calloc(1, sizeof(char));
-  unsigned int len = strlen(value);
+  unsigned int len = strlen(buffer);
 
   unsigned int i = 0;
-  while (value[i] != '\0' && i < len)
+  while (buffer[i] != '\0' && i < len)
   {
     formatted = realloc(formatted, (strlen(formatted) + 2) * sizeof(char));
-    strcat(formatted, (char[]){value[i], 0});
+    strcat(formatted, (char[]){buffer[i], 0});
     i += 1;
   }
-  free(value);
+  /* end format */
+  
+  token_T* token = init_token(formatted, TOKEN_STRING);
+  free(buffer);
 
-  return init_token(formatted, TOKEN_STRING);
+  return token;
 }
 
 
@@ -131,16 +160,26 @@ token_T* next_token(lexer_T* lexer)
       advance(lexer);
     }
     
-    if (isalpha(lexer->current_char))
+    if (lexer->current_char == '#')
     {
-      return lexer_id(lexer);
+      advance(lexer);
+      while (lexer->current_char != '\n' && lexer->current_char != 10)
+      {
+        advance(lexer); 
+      }
+      continue;
     }
-
+    
     if (isdigit(lexer->current_char))
     {
       return lexer_number(lexer);
     }
     
+    if (isalnum(lexer->current_char))
+    {
+      return lexer_id(lexer);
+    }
+
     switch (lexer->current_char)
     {
       case '=': return current_character(lexer, TOKEN_EQUAL);
@@ -185,6 +224,15 @@ char* token_to_str(token_T* token, lexer_T* lexer)
 
   char* str = calloc(strlen(kind_str) + strlen(template) + 12, sizeof(char));
   sprintf(str, template, kind_str, token->value, lexer->line_n);
+
+  return str;
+}
+
+char* current_char_as_str(lexer_T* lexer)
+{
+  char* str = calloc(2, sizeof(char));
+  str[0] = lexer->current_char;
+  str[1] = '\0';
 
   return str;
 }

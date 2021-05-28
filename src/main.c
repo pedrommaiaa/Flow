@@ -8,8 +8,10 @@
 
 int main(int argc, char* argv[])
 {
+
   if (argc < 2)
   {
+    // implement interactive shell here
     fprintf(stderr, "\033[1;31mPease specify input file.\033[0m\n]");
     return 1;
   }
