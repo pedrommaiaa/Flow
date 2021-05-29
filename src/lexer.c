@@ -220,7 +220,7 @@ const char* token_kind_to_str(int type)
 char* token_to_str(token_T* token, lexer_T* lexer)
 {
   const char* kind_str = token_kind_to_str(token->type);
-  const char* template = " %s -> %s  line: (%d)\n";
+  const char* template = " %s -> '%s'  line: (%d)\n";
 
   char* str = calloc(strlen(kind_str) + strlen(template) + 12, sizeof(char));
   sprintf(str, template, kind_str, token->value, lexer->line_n);
