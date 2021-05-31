@@ -1,5 +1,5 @@
 int main() {  
-  string name = "Pedro Maia";
+  string first_string = "Hello, World!";
   print(name); # this is a inline comment
   
   # this is a comment alone 
