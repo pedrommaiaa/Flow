@@ -84,7 +84,7 @@ static int scanident(int c, char *buf, int lim)
     // Error if we hit the identifier length limit,
     // else append to buf[] and get next character
     if (lim - 1 == i) {
-      printf("identifier too long on line %d\n", Line);
+      printf("[Line %d] Identifier too long.\n", Line);
       exit(1);
     } else if (i < lim - 1) {
       buf[i++] = c;
@@ -103,12 +103,12 @@ static int scanident(int c, char *buf, int lim)
 // Switch on the first letter so that we don't have
 // to waste time strcmp()ing against all the keywords.
 static int keyword(char *s) {
-  return (ID_T);
-  // switch (*s) 
-  // {
-  //  case 'p': if (!strcmp(s, "print")) return (PRINT_T); break;
-  // }
-  // return (0);
+  
+  switch (*s) 
+  {
+    case 'p': if (!strcmp(s, "print")) return (PRINT_T); break;
+  }
+  return (0);
 }
 
 
@@ -156,11 +156,11 @@ int scan(struct token *t)
           break;
         }
         // Not a recognised keyword, so an error for now
-        printf("Unrecognised symbol %s on line %d\n", Text, Line);
+        printf("[Line %d] Unrecognised symbol %s\n", Line, Text);
         exit(1);
       }
 
-    printf("Unrecognised character %c on line %d\n", c, Line);
+    printf("[Line %d] Unrecognised character %c\n", Line, c);
     exit(1);
   }
 
