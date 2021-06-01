@@ -11,3 +11,4 @@
 extern_ int     Line;
 extern_ int	Putback;
 extern_ FILE	*Infile;
+extern_ char Text[TEXTLEN + 1];

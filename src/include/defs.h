@@ -3,15 +3,12 @@
 #include <string.h>
 #include <ctype.h>
 
-// Structure and enum definitions
-// Copyright (c) 2019 Warren Toomey, GPL3
 
-// Structure and enum definitions
-// Copyright (c) 2019 Warren Toomey, GPL3
+#define TEXTLEN 512
 
 // Tokens
 enum {
-  T_PLUS, T_MINUS, T_STAR, T_SLASH, T_INTLIT, T_SEMI
+  PLUS_T, MINUS_T, STAR_T, SLASH_T, INT_T, SEMI_T, PRINT_T
 };
 
 // Token structure
