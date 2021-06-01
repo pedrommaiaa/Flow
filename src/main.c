@@ -15,7 +15,8 @@ static void init()
 
 
 // List of printable tokens, needs to be in the same order 
-char *tokstr[] = { "+", "-", "*", "/", "int", ";", "print", NULL };
+char *tokstr[] = { "+", "-", "*", "/", "int", ";", "ID",
+                   "(", ")", "{", "}",  NULL };
 
 // Loop scanning in all the tokens in the input file.
 // Print out details of each token found.

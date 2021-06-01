@@ -8,7 +8,8 @@
 
 // Tokens
 enum {
-  PLUS_T, MINUS_T, STAR_T, SLASH_T, INT_T, SEMI_T, PRINT_T
+  PLUS_T, MINUS_T, STAR_T, SLASH_T, INT_T, SEMI_T, ID_T,
+  LPAREN_T, RPAREN_T, LBRACE_T, RBRACE_T
 };
 
 // Token structure
