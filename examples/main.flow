@@ -1,7 +1,0 @@
-int main() {  
-  string first_string = "Hello, World!";
-  print(name); # this is a inline comment
-  
-  # this is a comment alone 
-  return 0;
-}

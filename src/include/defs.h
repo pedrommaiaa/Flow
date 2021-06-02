@@ -3,17 +3,28 @@
 #include <string.h>
 #include <ctype.h>
 
+// Structure and enum definitions
 
-#define TEXTLEN 512
-
-// Tokens
+// Token types
 enum {
-  PLUS_T, MINUS_T, STAR_T, SLASH_T, INT_T, SEMI_T, PRINT_T,
-  LPAREN_T, RPAREN_T, LBRACE_T, RBRACE_T
+  EOF_T, PLUS_T, MINUS_T, STAR_T, SLASH_T, INTLIT_T
 };
 
 // Token structure
 struct token {
-  int token;
-  int intvalue;
+  int token;				  // Token type, from the enum list above
+  int intvalue;				// For T_INTLIT, the integer value
+};
+
+// AST node types
+enum {
+  ADD_A, SUB_A, MUL_A, DIV_A, INTLIT_A
+};
+
+// Abstract Syntax Tree structure
+struct ASTnode {
+  int op;				            // "Operation" to be performed on this tree
+  struct ASTnode *left;			// Left and right child trees
+  struct ASTnode *right;
+  int intvalue;				      // For INTLIT_A, the integer value
 };
