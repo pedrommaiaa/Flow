@@ -67,7 +67,8 @@ static int scanint(int c) {
 
 // Scan and return the next token found in the input.
 // Return 1 if token valid, 0 if no tokens left.
-int scan(struct token *t) {
+int scan(struct token *t) 
+{
   int c;
 
   // Skip whitespace

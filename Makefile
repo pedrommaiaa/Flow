@@ -11,7 +11,7 @@ $(exec): $(objects)
 
 
 clean:
-	- rm -f flow
+	- rm -f flow out
 	- rm -f *.o *.s src/*.o
 
 test: flow

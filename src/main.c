@@ -6,7 +6,6 @@
 #include <errno.h>
 
 // Compiler setup and top-level execution
-// Copyright (c) 2019 Warren Toomey, GPL3
 
 // Initialise global variables
 static void init() {
@@ -14,11 +13,6 @@ static void init() {
   Putback = '\n';
 }
 
-// Print out a usage if started incorrectly
-static void usage(char *prog) {
-  fprintf(stderr, "Usage: %s infile\n", prog);
-  exit(1);
-}
 
 // Main program: check arguments and print a usage
 // if we don't have an argument. Open up the input
@@ -26,8 +20,12 @@ static void usage(char *prog) {
 void main(int argc, char *argv[]) {
   struct ASTnode *n;
 
-  if (argc != 2)
-    usage(argv[0]);
+  if (argc < 2)
+  {
+    printf("---- * Interactive Flow Shell * ----\n");
+    
+    printf("---- * Interactive Shell Terminated. * ----");
+  }
 
   init();
 
@@ -43,7 +41,7 @@ void main(int argc, char *argv[]) {
     exit(1);
   }
 
-
+  
   scan(&Token);			// Get the first token from the input
   n = binexpr(0);		// Parse the expression in the file
   printf("%d\n", interpretAST(n));	// Calculate the final result
