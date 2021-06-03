@@ -5,7 +5,7 @@
 // AST tree interpreter
 
 // List of AST operators
-static char *ASTop[] = { "+", "-", "*", "/" };
+// static char *ASTop[] = { "+", "-", "*", "/" };
 
 // Given an AST, interpret the
 // operators in it and return

@@ -18,14 +18,16 @@ typedef struct token {
   int intvalue;				// For T_INTLIT, the integer value
 } token_T;
 
-// AST node types
-enum {
-  ADD_A, SUB_A, MUL_A, DIV_A, INTLIT_A
-};
 
 // Abstract Syntax Tree structure
-typedef struct ASTnode {
-  int op;				            // "Operation" to be performed on this tree
+typedef struct ASTnode { 
+  enum { // AST node types
+    ADD_A, 
+    SUB_A, 
+    MUL_A, 
+    DIV_A, 
+    INTLIT_A
+  } op;                     // "Operation" to be performed on this tree
   struct ASTnode *left;			// Left and right child trees
   struct ASTnode *right;
   int intvalue;				      // For INTLIT_A, the integer value
