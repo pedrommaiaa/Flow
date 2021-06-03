@@ -5,12 +5,11 @@
 // AST tree functions
 
 // Build and return a generic AST node
-struct ASTnode *mkastnode(int op, struct ASTnode *left,
-			  struct ASTnode *right, int intvalue) {
-  struct ASTnode *n;
+AST_T *mkastnode(int op, AST_T *left, AST_T *right, int intvalue) {
+  AST_T *n;
 
   // Malloc a new ASTnode
-  n = (struct ASTnode *) malloc(sizeof(struct ASTnode));
+  n = (AST_T *) malloc(sizeof(AST_T));
   if (n == NULL) {
     fprintf(stderr, "[ERROR] Unable to malloc in mkastnode()\n");
     exit(1);
@@ -25,11 +24,11 @@ struct ASTnode *mkastnode(int op, struct ASTnode *left,
 
 
 // Make an AST leaf node
-struct ASTnode *mkastleaf(int op, int intvalue) {
+AST_T *mkastleaf(int op, int intvalue) {
   return (mkastnode(op, NULL, NULL, intvalue));
 }
 
 // Make a unary AST node: only one child
-struct ASTnode *mkastunary(int op, struct ASTnode *left, int intvalue) {
+AST_T *mkastunary(int op, AST_T *left, int intvalue) {
   return (mkastnode(op, left, NULL, intvalue));
 }

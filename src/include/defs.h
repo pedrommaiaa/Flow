@@ -11,10 +11,10 @@ enum {
 };
 
 // Token structure
-struct token {
+typedef struct token {
   int token;				  // Token type, from the enum list above
   int intvalue;				// For T_INTLIT, the integer value
-};
+} token_T;
 
 // AST node types
 enum {
@@ -22,9 +22,9 @@ enum {
 };
 
 // Abstract Syntax Tree structure
-struct ASTnode {
+typedef struct ASTnode {
   int op;				            // "Operation" to be performed on this tree
   struct ASTnode *left;			// Left and right child trees
   struct ASTnode *right;
   int intvalue;				      // For INTLIT_A, the integer value
-};
+} AST_T;

@@ -10,7 +10,7 @@ static char *ASTop[] = { "+", "-", "*", "/" };
 // Given an AST, interpret the
 // operators in it and return
 // a final value.
-int interpretAST(struct ASTnode *n) {
+int interpretAST(AST_T *n) {
   int leftval, rightval;
 
   // Get the left and right sub-tree values

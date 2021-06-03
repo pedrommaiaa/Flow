@@ -6,7 +6,7 @@
 
 // Given an AST, generate
 // assembly code recursively
-static int genAST(struct ASTnode *n)
+static int genAST(AST_T *n)
 {
   int leftreg, rightreg;
 
@@ -33,7 +33,7 @@ static int genAST(struct ASTnode *n)
   }
 }
 
-void generatecode(struct ASTnode *n)
+void generatecode(AST_T *n)
 {
   int reg;
 

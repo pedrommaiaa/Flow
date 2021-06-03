@@ -1,14 +1,13 @@
 // Function prototypes for all compiler files
-int scan(struct token *t);
+int scan(token_T *t);
 
-struct ASTnode *mkastnode(int op, struct ASTnode *left,
-			  struct ASTnode *right, int intvalue);
-struct ASTnode *mkastleaf(int op, int intvalue);
-struct ASTnode *mkastunary(int op, struct ASTnode *left, int intvalue);
-struct ASTnode *binexpr(int ptp);
+AST_T *mkastnode(int op, AST_T *left, AST_T *right, int intvalue);
+AST_T *mkastleaf(int op, int intvalue);
+AST_T *mkastunary(int op, AST_T *left, int intvalue);
+AST_T *binexpr(int ptp);
 
-int interpretAST(struct ASTnode *n);
-void generatecode(struct ASTnode *n);
+int interpretAST(AST_T *n);
+void generatecode(AST_T *n);
 
 void freeall_registers(void);
 void cgpreamble();

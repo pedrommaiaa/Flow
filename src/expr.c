@@ -6,8 +6,8 @@
 
 // Parse a primary factor and return an
 // AST node representing it.
-static struct ASTnode *primary(void) {
-  struct ASTnode *n;
+static AST_T *primary(void) {
+  AST_T *n;
 
   // For an INTLIT token, make a leaf AST node for it
   // and scan in the next token. Otherwise, a syntax error
@@ -54,8 +54,8 @@ static int op_precedence(int tokentype) {
 
 // Return an AST tree whose root is a binary operator.
 // Parameter ptp is the previous token's precedence.
-struct ASTnode *binexpr(int ptp) {
-  struct ASTnode *left, *right;
+AST_T *binexpr(int ptp) {
+  AST_T *left, *right;
   int tokentype;
 
   // Get the integer literal on the left.

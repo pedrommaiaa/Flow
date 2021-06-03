@@ -18,7 +18,7 @@ static void init() {
 // if we don't have an argument. Open up the input
 // file and call scanfile() to scan the tokens in it.
 void main(int argc, char *argv[]) {
-  struct ASTnode *n;
+  AST_T *n;
 
   if (argc < 2)
   {
