@@ -24,7 +24,7 @@ void main(int argc, char *argv[]) {
   {
     printf("---- * Interactive Flow Shell * ----\n");
     
-    printf("---- * Interactive Shell Terminated. * ----");
+    printf("---- * Interactive Shell Terminated. * ----\n");
   }
 
   init();
