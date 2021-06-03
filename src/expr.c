@@ -6,13 +6,15 @@
 
 // Parse a primary factor and return an
 // AST node representing it.
-static AST_T *primary(void) {
+static AST_T *primary(void) 
+{
   AST_T *n;
 
   // For an INTLIT token, make a leaf AST node for it
   // and scan in the next token. Otherwise, a syntax error
   // for any other token type.
-  switch (Token.token) {
+  switch (Token.token) 
+  {
     case INTLIT_T:
       n = mkastleaf(INTLIT_A, Token.intvalue);
       scan(&Token);
@@ -25,8 +27,10 @@ static AST_T *primary(void) {
 
 
 // Convert a token into an AST operation.
-int arithop(int tok) {
-  switch (tok) {
+int arithop(int tok) 
+{
+  switch (tok) 
+  {
     case PLUS_T: return (ADD_A);
     case MINUS_T: return (SUB_A);
     case STAR_T: return (MUL_A);
@@ -43,9 +47,11 @@ static int OpPrec[] = { 0, 10, 10, 20, 20, 0 };
 
 // Check that we have a binary operator and
 // return its precedence.
-static int op_precedence(int tokentype) {
+static int op_precedence(int tokentype) 
+{
   int prec = OpPrec[tokentype];
-  if (prec == 0) {
+  if (prec == 0) 
+  {
     fprintf(stderr, "[Line %d] Syntax error, token %d\n", Line, tokentype);
     exit(1);
   }
@@ -54,7 +60,8 @@ static int op_precedence(int tokentype) {
 
 // Return an AST tree whose root is a binary operator.
 // Parameter ptp is the previous token's precedence.
-AST_T *binexpr(int ptp) {
+AST_T *binexpr(int ptp) 
+{
   AST_T *left, *right;
   int tokentype;
 
@@ -65,11 +72,14 @@ AST_T *binexpr(int ptp) {
   // If no tokens left, return just the left node
   tokentype = Token.token;
   if (tokentype == EOF_T)
-    return (left);
+  {
+    return (left); 
+  }
 
   // While the precedence of this token is
   // more than that of the previous token precedence
-  while (op_precedence(tokentype) > ptp) {
+  while (op_precedence(tokentype) > ptp) 
+  {
     // Fetch in the next integer literal
     scan(&Token);
 
@@ -85,7 +95,9 @@ AST_T *binexpr(int ptp) {
     // If no tokens left, return just the left node
     tokentype = Token.token;
     if (tokentype == EOF_T)
+    { 
       return (left);
+    }
   }
 
   // Return the tree we have when the precedence

@@ -5,14 +5,16 @@
 
 // Structure and enum definitions
 
-// Token types
-enum {
-  EOF_T, PLUS_T, MINUS_T, STAR_T, SLASH_T, INTLIT_T
-};
-
 // Token structure
 typedef struct token {
-  int token;				  // Token type, from the enum list above
+  enum {
+    EOF_T, 
+    PLUS_T, 
+    MINUS_T, 
+    STAR_T, 
+    SLASH_T, 
+    INTLIT_T
+  } token;            // Token types
   int intvalue;				// For T_INTLIT, the integer value
 } token_T;
 
