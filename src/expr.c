@@ -20,23 +20,23 @@ static AST_T *primary(void)
       scan(&Token);
       return (n);
     default:
-      fprintf(stderr, "[Line %d] Syntax error\n", Line);
+      fprintf(stderr, "[Line %d] Syntax error, token '%d'\n", Line, Token.token);
       exit(1);
   }
 }
 
 
-// Convert a token into an AST operation.
-int arithop(int tok) 
+// Convert a binary operator token into an AST operation.
+static int arithop(int tokentype) 
 {
-  switch (tok) 
+  switch (tokentype) 
   {
     case PLUS_T: return (ADD_A);
     case MINUS_T: return (SUB_A);
     case STAR_T: return (MUL_A);
     case SLASH_T: return (DIV_A);
     default:
-      fprintf(stderr, "[Line %d] Unknown token in arithop()\n", Line);
+      fprintf(stderr, "[Line %d] syntax error, token '%d'\n", Line, tokentype);
       exit(1);
   }
 }
@@ -52,7 +52,7 @@ static int op_precedence(int tokentype)
   int prec = OpPrec[tokentype];
   if (prec == 0) 
   {
-    fprintf(stderr, "[Line %d] Syntax error, token %d\n", Line, tokentype);
+    fprintf(stderr, "[Line %d] Syntax error, token '%d'\n", Line, tokentype);
     exit(1);
   }
   return (prec);
@@ -71,7 +71,7 @@ AST_T *binexpr(int ptp)
 
   // If no tokens left, return just the left node
   tokentype = Token.token;
-  if (tokentype == EOF_T)
+  if (tokentype == SEMI_T)
   {
     return (left); 
   }
@@ -94,7 +94,7 @@ AST_T *binexpr(int ptp)
     // Update the details of the current token.
     // If no tokens left, return just the left node
     tokentype = Token.token;
-    if (tokentype == EOF_T)
+    if (tokentype == SEMI_T)
     { 
       return (left);
     }

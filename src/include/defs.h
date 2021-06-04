@@ -5,15 +5,17 @@
 
 // Structure and enum definitions
 
+#define TEXTLEN 512 // legnth of symbols in input
+
 // Token structure
 typedef struct token {
   enum {
     EOF_T, 
-    PLUS_T, 
-    MINUS_T, 
-    STAR_T, 
-    SLASH_T, 
-    INTLIT_T
+    PLUS_T, MINUS_T, 
+    STAR_T, SLASH_T, 
+    INTLIT_T, SEMI_T,
+    // Keywords
+    PRINT_T
   } token;            // Token types
   int intvalue;				// For T_INTLIT, the integer value
 } token_T;

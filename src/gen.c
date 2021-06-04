@@ -6,7 +6,7 @@
 
 // Given an AST, generate
 // assembly code recursively
-static int genAST(AST_T *n)
+int genAST(AST_T *n)
 {
   int leftreg, rightreg;
 
@@ -33,12 +33,23 @@ static int genAST(AST_T *n)
   }
 }
 
-void generatecode(AST_T *n)
-{
-  int reg;
 
+void genpreamble() 
+{
   cgpreamble();
-  reg = genAST(n);
-  cgprintint(reg);
+}
+
+void genpostamble() 
+{
   cgpostamble();
+}
+
+void genfreeregs() 
+{
+  freeall_registers();
+}
+
+void genprintint(int reg) 
+{
+  cgprintint(reg);
 }

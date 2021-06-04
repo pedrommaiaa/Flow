@@ -74,11 +74,61 @@ static int scanint(int c)
   return val;
 }
 
+// Scan an identifier from the input file and
+// store it in buf[]. Return the identifier's length
+static int scanident(int c, char *buf, int lim)
+{
+  int i = 0;
+
+  // Allow digits, alpha and underscorees
+  while (isalpha(c) || isdigit(c) || c == '_')
+  {
+    // Error if we hit the identifier length limit,
+    // else append to buf[] and get next character
+    if (lim - 1 == i)
+    {
+      printf("[Line %d] Identifier is too long.\n", Line);
+      exit(1);
+    }
+    else if (i < lim - 1)
+    {
+      buf[i++] = c;
+    }
+    c = next();
+  }
+  // We hit a non-valid character, put it back.
+  // NUL-terminate the buf[] and return the length
+  putback(c);
+  buf[i] = '\0';
+  return (i);
+}
+
+
+// Given a word from the input, return the matching
+// keyword token number or 0 if it's not a keyword.
+// Switch on the first letter so that we don't have
+// to wate time 'strcmp()ing' against all the keywords.
+static int keyword(char *s)
+{
+  switch (*s)
+  {
+    case 'p':
+      if (!strcmp(s, "print"))
+      {
+        return PRINT_T;
+      }
+      break;
+  }
+  return (0);
+}
+
+
+
 // Scan and return the next token found in the input.
 // Return 1 if token valid, 0 if no tokens left.
 int scan(token_T *t) 
 {
-  int c;
+  int c, tokentype;
 
   // Skip whitespace
   c = skip();
@@ -92,14 +142,31 @@ int scan(token_T *t)
     case '-': t->token = MINUS_T; break;
     case '*': t->token = STAR_T; break;
     case '/': t->token = SLASH_T; break;
+    case ';': t->token = SEMI_T; break;
     default:
 
       // If it's a digit, scan the
       // literal integer value in
-      if (isdigit(c)) {
+      if (isdigit(c)) 
+      {
         t->intvalue = scanint(c);
         t->token = INTLIT_T;
         break;
+      }
+      else if (isalpha(c) || c == '_')
+      {
+        // Read in a keyword or identifier
+        scanident(c, Text, TEXTLEN);
+
+        // If it's a recognised keyword, return that token
+        if (tokentype = keyword(Text))
+        {
+          t->token = tokentype; 
+          break;
+        }
+        // Not a recognised keyword, so an error for now
+        printf("[Line %d] Unrecognised symbol %s\n", Line, Text);
+        exit(1);
       }
 
       printf("[Line %d] Unrecognised character %c\n", Line, c);
