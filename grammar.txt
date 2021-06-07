@@ -1,0 +1,46 @@
+expression: number
+          | expression '*' expression
+          | expression '/' expression
+          | expression '+' expression
+          | expression '-' expression
+          ;
+
+# An expression could be just a number, or
+# An expression is two expression separated by a '*' token, or
+# An expression is two expression separated by a '/' token, or
+# An expression is two expression separated by a '+' token, or
+# An expression is two expression separated by a '-' token
+
+
+expression: additive_expression
+          ;
+
+
+additive_expression:
+            multiplicative_expression
+          | additive_expression '+' multiplicative_expression
+          | additive_expression '-' multiplicative_expression
+          ;
+
+# Any additive expression is actually either a multiplicative expression by itself, 
+# or an additive (i.e. multiplicative) expression followed by a '+' or '-' operator 
+# then another multiplicative expression. The additive expression is now at a 
+# much lower predencence than the multiplicative expression.
+
+multiplicative_expression:
+           number 
+          | number '*' multiplicative_expression
+          | number '/' multiplicative_expression
+          ;
+
+# The grammar forces the numbers to be part of multiplicative expressions only.
+# This forces the '*' and '/' operators to bind more tightly to the numbers 
+# on either side, thus having higher precedence.
+
+
+
+number: INTLIT_T
+        ;
+
+# A number is always a INTLIT_T token
+
