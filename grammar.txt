@@ -44,3 +44,16 @@ number: INTLIT_T
 
 # A number is always a INTLIT_T token
 
+
+statements: statement
+    | statement statements
+    ;
+
+statement: 'print' expression ';'
+    ;
+
+# An input file consists of several statements. They are either one statement, 
+# or a statement followed by more statements. Each statement starts with the 
+# keyword print, then one expression, then a semicolon.
+
+

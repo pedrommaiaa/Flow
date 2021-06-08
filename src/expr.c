@@ -42,6 +42,7 @@ static int arithop(int tokentype)
 }
 
 // Operator precedence for each token
+// *same order as the token types*
 static int OpPrec[] = { 0, 10, 10, 20, 20, 0 };
 //                     EOF  +   -   *   / INTLIT
 
