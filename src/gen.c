@@ -6,19 +6,15 @@
 
 // Given an AST, generate
 // assembly code recursively
-int genAST(AST_T *n)
+int genAST(AST_T *n, int reg)
 {
   int leftreg, rightreg;
 
   // Get the left and right sub-tree values
   if (n->left)
-  {
-    leftreg = genAST(n->left);
-  }
+    leftreg = genAST(n->left, -1);
   if (n->right)
-  {
-    rightreg = genAST(n->right);
-  }
+    rightreg = genAST(n->right, leftreg);
 
   switch (n->op)
   {
@@ -26,10 +22,11 @@ int genAST(AST_T *n)
     case SUB_A: return (cgsub(leftreg, rightreg));
     case MUL_A: return (cgmul(leftreg, rightreg));
     case DIV_A: return (cgdiv(leftreg, rightreg));
-    case INTLIT_A: return (cgload(n->intvalue));
-    default: 
-        fprintf(stderr, "[ERROR] Unkown AST operator %d\n", n->op);
-        exit(1);
+    case INTLIT_A: return (cgloadint(n->v.intvalue));
+    case IDENT_A: return (cgloadglob(Gsym[n->v.id].name));
+    case LVIDENT_A: return (cgstorglob(reg, Gsym[n->v.id].name));
+    case ASSIGN_A: return (rightreg);// The work has already been done, return the result
+    default: fatald("Unknown AST operator", n->op);
   }
 }
 
@@ -52,4 +49,9 @@ void genfreeregs()
 void genprintint(int reg) 
 {
   cgprintint(reg);
+}
+
+void genglobsym(char *s) 
+{
+  cgglobsym(s);
 }

@@ -9,20 +9,31 @@
 static AST_T *primary(void) 
 {
   AST_T *n;
+  int id;
 
-  // For an INTLIT token, make a leaf AST node for it
-  // and scan in the next token. Otherwise, a syntax error
-  // for any other token type.
   switch (Token.token) 
   {
-    case INTLIT_T:
-      n = mkastleaf(INTLIT_A, Token.intvalue);
-      scan(&Token);
-      return (n);
+    // For an INTLIT token, make a leaf AST node for it
+    case INTLIT_T: 
+          n = mkastleaf(INTLIT_A, Token.intvalue); 
+          break;
+    case IDENT_T:
+          // Check that this identifier exists
+          id = findglob(Text);
+          if (id == -1)
+            fatals("Unkown variable", Text);
+
+          // Make a leaf AST node for it
+          n = mkastleaf(IDENT_A, id);
+          break;
+    
     default:
-      fprintf(stderr, "[Line %d] Syntax error, token '%d'\n", Line, Token.token);
-      exit(1);
+      fatald("Syntax error, token", Token.token);
   }
+
+  // Scan in the next token and return the leaf node
+  scan(&Token);
+  return (n);
 }
 
 
@@ -36,10 +47,10 @@ static int arithop(int tokentype)
     case STAR_T: return (MUL_A);
     case SLASH_T: return (DIV_A);
     default:
-      fprintf(stderr, "[Line %d] syntax error, token '%d'\n", Line, tokentype);
-      exit(1);
+      fatald("Syntax error, token", tokentype);
   }
 }
+
 
 // Operator precedence for each token
 // *same order as the token types*
@@ -52,10 +63,7 @@ static int op_precedence(int tokentype)
 {
   int prec = OpPrec[tokentype];
   if (prec == 0) 
-  {
-    fprintf(stderr, "[Line %d] Syntax error, token '%d'\n", Line, tokentype);
-    exit(1);
-  }
+    fatald("Syntax error, token", tokentype);
   return (prec);
 }
 
@@ -73,9 +81,7 @@ AST_T *binexpr(int ptp)
   // If no tokens left, return just the left node
   tokentype = Token.token;
   if (tokentype == SEMI_T)
-  {
     return (left); 
-  }
 
   // While the precedence of this token is
   // more than that of the previous token precedence
@@ -96,9 +102,7 @@ AST_T *binexpr(int ptp)
     // If no tokens left, return just the left node
     tokentype = Token.token;
     if (tokentype == SEMI_T)
-    { 
       return (left);
-    }
   }
 
   // Return the tree we have when the precedence

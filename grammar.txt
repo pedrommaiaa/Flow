@@ -50,10 +50,14 @@ statements: statement
     ;
 
 statement: 'print' expression ';'
+    |      'int'   identifier ';'
+    |      identifer '=' expression ';'
     ;
 
 # An input file consists of several statements. They are either one statement, 
-# or a statement followed by more statements. Each statement starts with the 
-# keyword print, then one expression, then a semicolon.
+# or a statement followed by more statements.
 
+identifier: IDENT_T
+    ;
 
+# An identifer is returned as a IDENT_T token.

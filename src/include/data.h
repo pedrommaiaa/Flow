@@ -3,9 +3,10 @@
 #endif
 
 // Global variables
-extern_ int     	    Line;
-extern_ int		        Putback;
-extern_ FILE		      *Infile;
+extern_ int     	    Line;                 // Current line number
+extern_ int		        Putback;              // Character put back by scanner
+extern_ FILE		      *Infile;              // Input and output files
 extern_ FILE		      *Outfile;
-extern_ token_T	      Token;
-extern_ char          Text[TEXTLEN + 1];
+extern_ token_T	      Token;                // Last token scanned
+extern_ char          Text[TEXTLEN + 1];    // Last identifer scanned
+extern_ SymTable      Gsym[NSYMBOLS];       // Global symbol table

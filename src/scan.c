@@ -20,17 +20,15 @@ static int next(void)
   int c;
 
   if (Putback) 
-  {		              // Use the character put
-    c = Putback;		// back if there is one
+  {		                  // Use the character put
+    c = Putback;		    // back if there is one
     Putback = 0;
     return c;
   }
 
   c = fgetc(Infile);		// Read from input file
-  if (c == '\n')
-  { 
-    Line++;			// Increment line count
-  }
+  if (c == '\n') 
+    Line++;			        // Increment line count
   return c;
 }
 
@@ -71,7 +69,7 @@ static int scanint(int c)
 
   // We hit a non-integer character, put it back.
   putback(c);
-  return val;
+  return (val);
 }
 
 // Scan an identifier from the input file and
@@ -87,8 +85,7 @@ static int scanident(int c, char *buf, int lim)
     // else append to buf[] and get next character
     if (lim - 1 == i)
     {
-      printf("[Line %d] Identifier is too long.\n", Line);
-      exit(1);
+      fatal("Identifier too long");
     }
     else if (i < lim - 1)
     {
@@ -112,6 +109,12 @@ static int keyword(char *s)
 {
   switch (*s)
   {
+    case 'i':
+      if (!strcmp(s, "int"))
+      {
+        return INT_T;
+      }
+      break;
     case 'p':
       if (!strcmp(s, "print"))
       {
@@ -143,6 +146,7 @@ int scan(token_T *t)
     case '*': t->token = STAR_T; break;
     case '/': t->token = SLASH_T; break;
     case ';': t->token = SEMI_T; break;
+    case '=': t->token = EQUALS_T; break;
     default:
 
       // If it's a digit, scan the
@@ -164,13 +168,12 @@ int scan(token_T *t)
           t->token = tokentype; 
           break;
         }
-        // Not a recognised keyword, so an error for now
-        printf("[Line %d] Unrecognised symbol %s\n", Line, Text);
-        exit(1);
+        // Not a recognised keyword, so it must be an identifier
+        t->token = IDENT_T;
+        break;
       }
-
-      printf("[Line %d] Unrecognised character %c\n", Line, c);
-      exit(1);
+      // The character isn't part of any recognised token, error
+      fatalc("Unrecognised character", c);
   }
 
   // We found a token
