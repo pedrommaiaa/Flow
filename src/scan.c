@@ -4,16 +4,6 @@
 
 // Lexical scanning
 
-// Return the position of character c
-// in string s, or -1 if c not found
-static int chrpos(char *s, int c) 
-{
-  char *p;
-
-  p = strchr(s, c);
-  return (p ? p - s : -1);
-}
-
 // Get the next character from the input file.
 static int next(void) 
 {
@@ -59,14 +49,13 @@ static int skip(void)
 static int scanint(int c) 
 {
   int val = c - '0';
-  printf("val: %d\n", val);
+  // printf("val: %d\n", val);
   int k = (c = next());
   // Convert c from ASCII digit to integer.
-  // isdigit((c = next()))
   while (k >= 0 && k <= 9) 
   {
     val = val * 10 + (c - '0');
-    printf("val: %d\n", val);
+    // printf("val: %d\n", val);
     c = next();
   }
 
