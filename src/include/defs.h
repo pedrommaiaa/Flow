@@ -16,9 +16,11 @@ typedef struct token
   {
     EOF_T, 
     PLUS_T, MINUS_T, 
-    STAR_T, SLASH_T, 
-    INTLIT_T, SEMI_T,
-    EQUALS_T, IDENT_T,
+    STAR_T, SLASH_T,
+    EQUAL_T, NOT_EQUAL_T,
+    LESS_THAN_T, GREATER_THAN_T,
+    LESS_OR_EQUAL_T, GREATER_OR_EQUAL_T,
+    INTLIT_T, SEMI_T, ASSIGN_T, IDENT_T,
     // Keywords
     PRINT_T, INT_T
   } token;            // Token types
@@ -31,14 +33,11 @@ typedef struct ASTnode
 { 
   enum 
   { // AST node types
-    ADD_A, 
-    SUB_A, 
-    MUL_A, 
-    DIV_A, 
+    ADD_A=1, SUB_A, MUL_A, DIV_A,
+    EQUAL_A, NOT_EQUAL_A, LESS_THAN_A, GREATER_THAN_A, 
+    LESS_OR_EQUAL_A, GREATER_OR_EQUAL_A, 
     INTLIT_A,
-    IDENT_A,
-    LVIDENT_A,
-    ASSIGN_A
+    IDENT_A, LVIDENT_A, ASSIGN_A
   } op;                       // "Operation" to be performed on this tree
   struct ASTnode *left;			  // Left and right child trees
   struct ASTnode *right;

@@ -146,7 +146,10 @@ int scan(token_T *t)
     case '*': t->token = STAR_T; break;
     case '/': t->token = SLASH_T; break;
     case ';': t->token = SEMI_T; break;
-    case '=': t->token = EQUALS_T; break;
+    case '=': if ((c = next()) == '=') t->token = EQUAL_T; else t->token = ASSIGN_T; break;
+    case '!': if ((c = next()) == '=') t->token = NOT_EQUAL_T; else fatalc("Unrecognised character", c); break;
+    case '<': if ((c = next()) == '=') t->token = LESS_OR_EQUAL_T; else t->token = LESS_THAN_T; break;
+    case '>': if ((c = next()) == '=') t->token = GREATER_OR_EQUAL_T; else t->token = GREATER_THAN_T; break;
     default:
 
       // If it's a digit, scan the

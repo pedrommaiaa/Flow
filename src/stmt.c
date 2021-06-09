@@ -54,7 +54,7 @@ void assignment_statement(void)
   right = mkastleaf(LVIDENT_A, id);
 
   // Ensure we have an equals sign
-  match(EQUALS_T, "=");
+  match(ASSIGN_T, "=");
 
   // Parse the following expression
   left = binexpr(0);
@@ -83,7 +83,7 @@ void statements(void)
       case INT_T: var_declaration(); break;
       case IDENT_T: assignment_statement(); break;
       case EOF_T: return;
-      default: fatald("Syntax error, token", Token.token);
+      default: fatald("Syntax error, token", Token.token); 
     }
   }
 }

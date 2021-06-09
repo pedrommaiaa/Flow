@@ -38,31 +38,30 @@ static AST_T *primary(void)
 
 
 // Convert a binary operator token into an AST operation.
+// We rely on a 1:1 mapping from token to AST operation.
 static int arithop(int tokentype) 
 {
-  switch (tokentype) 
-  {
-    case PLUS_T: return (ADD_A);
-    case MINUS_T: return (SUB_A);
-    case STAR_T: return (MUL_A);
-    case SLASH_T: return (DIV_A);
-    default:
-      fatald("Syntax error, token", tokentype);
-  }
+  if (tokentype > EOF_T && tokentype < INTLIT_T)
+    return (tokentype);
+  fatald("Syntax error, token", tokentype);
 }
 
 
 // Operator precedence for each token
 // *same order as the token types*
-static int OpPrec[] = { 0, 10, 10, 20, 20, 0 };
-//                     EOF  +   -   *   / INTLIT
+static int OpPrec[] = { 
+  0, 10, 10,          // EOF_T, PLUS_T, MINUS_T 
+  20, 20,             // STAR_T, SLASH_T
+  30, 30,             // EQUAL_T, NOT_EQUAL_T 
+  40, 40, 40, 40      // LESS_THAN_T, GREATER_THAN_T, LESS_OR_EQUAL_T, GREATER_OR_EQUAL_T 
+};
 
 // Check that we have a binary operator and
 // return its precedence.
 static int op_precedence(int tokentype) 
 {
   int prec = OpPrec[tokentype];
-  if (prec == 0) 
+  if (prec == 0)
     fatald("Syntax error, token", tokentype);
   return (prec);
 }

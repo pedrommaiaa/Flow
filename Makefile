@@ -18,7 +18,7 @@ clean:
 
 
 test: flow
-	./flow examples/input02
+	./flow examples/input03
 	gcc -o out out.s
 	./out
 
