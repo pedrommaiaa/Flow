@@ -46,16 +46,25 @@ static int skip(void)
 // Scan and return an integer literal
 // value from the input file. Store
 // the value as a string in Text.
-static int scanint(int c) 
+static int scanint(char c) 
 {
-  int k, val = 0;
-  // Convert c from ASCII digit to integer.
-  for (k = c - '0'; 0 <= k && k <= 9; c = next(), k = c - '0')
+  int val = 0;
+  int k = c - '0';
+  if (k > 0)
   {
-      val = val * 10 + k;
+    // Convert c from ASCII digit to integer.
+    while (k >= 0 && k <= 9)
+    {
+      val = val*10 + k;
       c = next();
+      k = c - '0';
+    }  
   }
-  
+  else 
+  {
+    // Implement hex here
+  }
+
   // We hit a non-integer character, put it back.
   putback(c);
   return (val);
@@ -143,7 +152,7 @@ int scan(token_T *t)
 
       // If it's a digit, scan the
       // literal integer value in
-      if (isdigit(c)) 
+      if (c >= '0' && c <= '9') 
       {
         t->intvalue = scanint(c);
         t->token = INTLIT_T;
