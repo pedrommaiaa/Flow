@@ -48,17 +48,14 @@ static int skip(void)
 // the value as a string in Text.
 static int scanint(int c) 
 {
-  int val = c - '0';
-  // printf("val: %d\n", val);
-  int k = (c = next());
+  int k, val = 0;
   // Convert c from ASCII digit to integer.
-  while (k >= 0 && k <= 9) 
+  for (k = c - '0'; 0 <= k && k <= 9; c = next(), k = c - '0')
   {
-    val = val * 10 + (c - '0');
-    // printf("val: %d\n", val);
-    c = next();
+      val = val * 10 + k;
+      c = next();
   }
-
+  
   // We hit a non-integer character, put it back.
   putback(c);
   return (val);

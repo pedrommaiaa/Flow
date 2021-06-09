@@ -7,7 +7,7 @@
 
 #define TEXTLEN     512     // legnth of symbols in input
 #define NSYMBOLS    1024    // Number of symbol table entrie
-
+// #define XX ((unsigned char)0xFF)
 
 // Token structure
 typedef struct token 
