@@ -58,12 +58,15 @@ static int skip(void)
 // the value as a string in Text.
 static int scanint(int c) 
 {
-  int k, val = 0;
-
-  // Convert each character into an int value
-  while ((k = chrpos("0123456789", c)) >= 0) 
+  int val = c - '0';
+  printf("val: %d\n", val);
+  int k = (c = next());
+  // Convert c from ASCII digit to integer.
+  // isdigit((c = next()))
+  while (k >= 0 && k <= 9) 
   {
-    val = val * 10 + k;
+    val = val * 10 + (c - '0');
+    printf("val: %d\n", val);
     c = next();
   }
 
