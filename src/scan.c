@@ -150,7 +150,7 @@ int scan(token_T *t)
     case '}': t->token = RBRACE_T; break;
     case '(': t->token = LPAREN_T; break;
     case ')': t->token = RPAREN_T; break;
-    case '=': if ((c = next()) == '=') t->token = EQUAL_T; else t->token = ASSIGN_T; break;
+    case '=': if ((c = next()) == '=') t->token = EQUAL_T; else t->token = ASSIGN_T; break; 
     case '!': if ((c = next()) == '=') t->token = NOT_EQUAL_T; else fatalc("Unrecognised character", c); break;
     case '<': if ((c = next()) == '=') t->token = LESS_OR_EQUAL_T; else t->token = LESS_THAN_T; break;
     case '>': if ((c = next()) == '=') t->token = GREATER_OR_EQUAL_T; else t->token = GREATER_THAN_T; break;

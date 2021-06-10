@@ -1,4 +1,8 @@
 # The Flow Programming Language
 
+- Architectures supported:
+  - x86\_64
 
-only supports x86-64 architecture for now.
+
+#### To-do's:
+  - assignments like `j = 6;` work. but `j =6;` don't, figure out why.
