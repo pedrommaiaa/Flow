@@ -1,31 +1,16 @@
-exec = flow
 sources = $(wildcard src/*.c)
-objects = $(sources:.c=.o)
-flags = -Wall -g
 
-
-$(exec): $(objects)
-	gcc $(objects) $(flags) -o $(exec)
-
-
-%.o: %.c include/%.h
-	gcc -c $(flags) $< -o $@
-
+flow: $(sources)
+	gcc -o flow -g $(sources)
 
 clean:
 	- rm -f flow out
 	- rm -f *.o *.s src/*.o
 
-test: flow	
-	./flow examples/input01
-	gcc -o out out.s
-	./out
-	./flow examples/input02
-	gcc -o out out.s
-	./out
-	./flow examples/input03
-	gcc -o out out.s
-	./out
-	./flow examples/input04
+test: flow tests/bash/runtests.sh
+	(cd tests/bash; chmod +x runtests.sh; ./runtests.sh)
+
+test1: flow tests/input04
+	./flow tests/input04
 	gcc -o out out.s
 	./out
