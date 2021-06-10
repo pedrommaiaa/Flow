@@ -3,8 +3,9 @@
   i = 6; 
   j = 12;
   if (i < j) {
-    print i;
+    print(i);
   } else {
-    print j;
+    print(j);
   }
+  print(42);
 }

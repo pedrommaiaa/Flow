@@ -37,9 +37,11 @@ static AST_T *print_statement(void)
 
   // Match 'print' as the first token
   match(PRINT_T, "print");
+  lparen();
 
   // Parse the following expression
   tree = binexpr(0);
+  rparen();
 
   // Make an print AST tree
   tree = mkastunary(PRINT_A, tree, 0);

@@ -17,6 +17,15 @@ clean:
 	- rm -f *.o *.s src/*.o
 
 test: flow	
+	./flow examples/input01
+	gcc -o out out.s
+	./out
+	./flow examples/input02
+	gcc -o out out.s
+	./out
+	./flow examples/input03
+	gcc -o out out.s
+	./out
 	./flow examples/input04
 	gcc -o out out.s
 	./out
