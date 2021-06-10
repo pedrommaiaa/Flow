@@ -18,6 +18,7 @@ static void init() {
 // if we don't have an argument. Open up the input
 // file and call scanfile() to scan the tokens in it.
 void main(int argc, char *argv[]) {
+  AST_T *tree;
 
   if (argc < 2)
   {
@@ -42,10 +43,11 @@ void main(int argc, char *argv[]) {
   }
 
   
-  scan(&Token);			// Get the first token from the input
-  genpreamble();    // Output the preamble
-  statements();     // Parse the statements in the input
-  genpostamble();   // Output the postamble
-  fclose(Outfile);  // Close the output file and exit
+  scan(&Token);			               // Get the first token from the input
+  genpreamble();                   // Output the preamble
+  tree = compound_statement();     // Parse the compound statement in the input
+  genAST(tree, NOREG, 0);          // Generate the assembly code for it
+  genpostamble();                  // Output the postamble
+  fclose(Outfile);                 // Close the output file and exit
   exit(0);
 }

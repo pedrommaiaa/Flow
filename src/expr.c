@@ -77,9 +77,9 @@ AST_T *binexpr(int ptp)
   // Fetch the next token at the same time.
   left = primary();
 
-  // If no tokens left, return just the left node
+  // If we hit a semicolon or ')', return just the left node
   tokentype = Token.token;
-  if (tokentype == SEMI_T)
+  if (tokentype == SEMI_T || tokentype == RPAREN_T)
     return (left); 
 
   // While the precedence of this token is
@@ -95,12 +95,12 @@ AST_T *binexpr(int ptp)
 
     // Join that sub-tree with ours. Convert the token
     // into an AST operation at the same time.
-    left = mkastnode(arithop(tokentype), left, right, 0);
+    left = mkastnode(arithop(tokentype), left, NULL, right, 0);
 
     // Update the details of the current token.
-    // If no tokens left, return just the left node
+    // If we hit a semicolon or ')', return just the left node
     tokentype = Token.token;
-    if (tokentype == SEMI_T)
+    if (tokentype == SEMI_T || tokentype == RPAREN_T)
       return (left);
   }
 

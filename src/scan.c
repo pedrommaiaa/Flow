@@ -102,22 +102,24 @@ static int scanident(int c, char *buf, int lim)
 // Given a word from the input, return the matching
 // keyword token number or 0 if it's not a keyword.
 // Switch on the first letter so that we don't have
-// to wate time 'strcmp()ing' against all the keywords.
+// to waste time 'strcmp()ing' against all the keywords.
 static int keyword(char *s)
 {
   switch (*s)
   {
+    case 'e':
+      if (!strcmp(s, "else"))
+        return (ELSE_T);
+      break;
     case 'i':
+      if (!strcmp(s, "if"))
+        return (IF_T);
       if (!strcmp(s, "int"))
-      {
         return INT_T;
-      }
       break;
     case 'p':
       if (!strcmp(s, "print"))
-      {
         return PRINT_T;
-      }
       break;
   }
   return (0);
@@ -144,6 +146,10 @@ int scan(token_T *t)
     case '*': t->token = STAR_T; break;
     case '/': t->token = SLASH_T; break;
     case ';': t->token = SEMI_T; break;
+    case '{': t->token = LBRACE_T; break;
+    case '}': t->token = RBRACE_T; break;
+    case '(': t->token = LPAREN_T; break;
+    case ')': t->token = RPAREN_T; break;
     case '=': if ((c = next()) == '=') t->token = EQUAL_T; else t->token = ASSIGN_T; break;
     case '!': if ((c = next()) == '=') t->token = NOT_EQUAL_T; else fatalc("Unrecognised character", c); break;
     case '<': if ((c = next()) == '=') t->token = LESS_OR_EQUAL_T; else t->token = LESS_THAN_T; break;

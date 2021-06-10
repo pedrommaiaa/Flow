@@ -27,6 +27,26 @@ void semi(void)
   match(SEMI_T, ";"); 
 }
 
+// Match a left brace and fetch the next token
+void lbrace(void) {
+  match(LBRACE_T, "{");
+}
+
+// Match a right brace and fetch the next token
+void rbrace(void) {
+  match(RBRACE_T, "}");
+}
+
+// Match a left parenthesis and fetch the next token
+void lparen(void) {
+  match(LPAREN_T, "(");
+}
+
+// Match a right parenthesis and fetch the next token
+void rparen(void) {
+  match(RPAREN_T, ")");
+}
+
 // Match an identifier and fetch the next token
 void ident(void) 
 { 

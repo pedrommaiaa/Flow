@@ -5,16 +5,8 @@ expression: number
           | expression '-' expression
           ;
 
-# An expression could be just a number, or
-# An expression is two expression separated by a '*' token, or
-# An expression is two expression separated by a '/' token, or
-# An expression is two expression separated by a '+' token, or
-# An expression is two expression separated by a '-' token
-
-
 expression: additive_expression
           ;
-
 
 additive_expression:
             multiplicative_expression
@@ -22,42 +14,41 @@ additive_expression:
           | additive_expression '-' multiplicative_expression
           ;
 
-# Any additive expression is actually either a multiplicative expression by itself, 
-# or an additive (i.e. multiplicative) expression followed by a '+' or '-' operator 
-# then another multiplicative expression. The additive expression is now at a 
-# much lower predencence than the multiplicative expression.
-
 multiplicative_expression:
            number 
           | number '*' multiplicative_expression
           | number '/' multiplicative_expression
           ;
 
-# The grammar forces the numbers to be part of multiplicative expressions only.
-# This forces the '*' and '/' operators to bind more tightly to the numbers 
-# on either side, thus having higher precedence.
-
-
-
 number: INTLIT_T
         ;
 
-# A number is always a INTLIT_T token
-
-
-statements: statement
-    | statement statements
+compound_statement: '{' '}' // empty, i.e. no statement
+    | '{' statement '}'
+    | '{' statement statements '}'
     ;
 
-statement: 'print' expression ';'
-    |      'int'   identifier ';'
-    |      identifer '=' expression ';'
+statement: print_statement
+    |      declaration
+    |      assignment_statement
+    |      if_statement
     ;
 
-# An input file consists of several statements. They are either one statement, 
-# or a statement followed by more statements.
+print_statement: 'print' '(' expression ')' ';' 
+    ;
+
+declaration: 'int' identifier ';' 
+    ;
+
+assignment_statement: identifier '=' expression ';' 
+    ;
+
+if_statement: if_head
+    |         if_head 'else' compound_statement
+    ;
+
+if_head: 'if' '(' true_false_expression ')' compound_statement 
+    ;
 
 identifier: IDENT_T
     ;
-
-# An identifer is returned as a IDENT_T token.
