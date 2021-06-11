@@ -21,7 +21,7 @@ typedef struct token
     INTLIT_T, SEMI_T, ASSIGN_T, IDENT_T,
     LBRACE_T, RBRACE_T, LPAREN_T, RPAREN_T,
     // Keywords
-    PRINT_T, INT_T, IF_T, ELSE_T
+    PRINT_T, INT_T, IF_T, ELSE_T, WHILE_T
   } token;            // Token types
   int intvalue;				// For T_INTLIT, the integer value
 } token_T;
@@ -35,7 +35,8 @@ typedef struct ASTnode
     ADD_A = 1, SUB_A, MUL_A, DIV_A,
     EQUAL_A, NOT_EQUAL_A, LESS_THAN_A, GREATER_THAN_A, LESS_OR_EQUAL_A, GREATER_OR_EQUAL_A, 
     INTLIT_A,
-    IDENT_A, LVIDENT_A, ASSIGN_A, PRINT_A, GLUE_A, IF_A
+    IDENT_A, LVIDENT_A, ASSIGN_A, PRINT_A, GLUE_A, 
+    IF_A, WHILE_A
   } op;                       // "Operation" to be performed on this tree
   struct ASTnode *left;			  // Left, middle right child trees
   struct ASTnode *mid;

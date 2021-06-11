@@ -28,7 +28,7 @@ static int genIFAST(AST_T *n)
     Lend = label();
 
   // Generate the condition code followed
-  // by a zero jump to the false lavel.
+  // by a zero jump to the false label.
   // We cheat by sending the Lfalse label as a register.
   genAST(n->left, Lfalse, n->op);
   genfreeregs();
@@ -60,6 +60,35 @@ static int genIFAST(AST_T *n)
 
 
 
+// Generate the code for an WHILE statement
+// and an optional ELSE clause
+static int genWHILE(AST_T *n)
+{
+  int Lstart, Lend;
+
+  // Generate the start and end labels
+  // and output the start label
+  Lstart = label();
+  Lend = label();
+  cglabel(Lstart);
+
+  // Generate the condition code followed
+  // by a jump to the end label.
+  // We cheat by sending the Lfalse label as a register.
+  genAST(n->left, Lend, n->op);
+  genfreeregs();
+
+  // Generate the true compound satatement
+  genAST(n->right, NOREG, n->op);
+  genfreeregs();
+
+  // Finally output the jump back to the condition,
+  // and the end label
+  cgjump(Lstart);
+  cglabel(Lend);
+  return (NOREG);
+}
+
 
 // Given an AST, the register (if any) that holds
 // the previous rvalue, and the AST op of the parent,
@@ -74,6 +103,8 @@ int genAST(AST_T *n, int reg, int parentASTop)
   {
     case IF_A: 
         return (genIFAST(n));
+    case WHILE_A:
+        return (genWHILE(n));
     case GLUE_A:
         // Do each child statement, and free the
         // registers after each child
@@ -108,7 +139,7 @@ int genAST(AST_T *n, int reg, int parentASTop)
         // If the parent AST node is an IF_A, generate a compare
         // followed by a jump. Otherwise, compare registers and
         // set one to 1 or 0 based on the comparison
-        if (parentASTop == IF_A)
+        if (parentASTop == IF_A || parentASTop == WHILE_A)
           return (cgcompare_and_jump(n->op, leftreg, rightreg, reg));
         else
           return (cgcompare_and_set(n->op, leftreg, rightreg)); 

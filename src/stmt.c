@@ -13,23 +13,12 @@
 //      |     declaration
 //      |     assignment_statement
 //      |     if_statement
+//      |     while_statement
 //      ;
-//
+
+
 // print_statement: 'print' expression ';'  ;
 //
-// declaration: 'int' identifier ';'  ;
-//
-// assignment_statement: identifier '=' expression ';'   ;
-//
-// if_statement: if_head
-//      |        if_head 'else' compound_statement
-//      ;
-//
-// if_head: 'if' '(' true_false_expression ')' compound_statement  ;
-//
-// identifier: T_IDENT ;
-
-
 static AST_T *print_statement(void)
 {
   AST_T *tree;
@@ -51,7 +40,8 @@ static AST_T *print_statement(void)
   return (tree);
 }
 
-
+// assignment_statement: identifier '=' expression ';'   ;
+//
 static AST_T *assignment_statement(void)
 {
   AST_T *left, *right, *tree;
@@ -81,7 +71,17 @@ static AST_T *assignment_statement(void)
   semi();
   return (tree);
 } 
-  
+
+
+// if_statement: if_head
+//      |        if_head 'else' compound_statement
+//      ;
+//
+// if_head: 'if' '(' true_false_expression ')' compound_statement  ;
+//
+// Parse an IF statement including
+// any optional ELSE clause
+// and return its AST
 AST_T *if_statement(void)
 {
   AST_T *condAST, *trueAST, *falseAST = NULL;
@@ -115,6 +115,36 @@ AST_T *if_statement(void)
 }
 
 
+// while_statement: 'while' '(' true_false_expression ')' compound_statement ;
+//
+// Parse a WHILE statement
+// and return its AST
+AST_T *while_statement(void)
+{
+  AST_T *condAST, *bodyAST;
+
+  // Ensure we have 'while' '('
+  match(WHILE_T, "while");
+  lparen();
+
+
+  // Parse the following expression
+  // and the ')' following. Ensure
+  // the tree's operation is a comparison.
+  condAST = binexpr(0);
+
+  if (condAST->op < EQUAL_A || condAST->op > GREATER_OR_EQUAL_A)
+    fatal("Bad comparison operator");
+  rparen();
+
+  // Get the AST for the compound statement
+  bodyAST = compound_statement();
+
+  // Build and return the AST for this statement
+  return (mkastnode(WHILE_A, condAST, NULL, bodyAST, 0));
+}
+
+
 // Parse a compound statement
 // and return its AST
 AST_T *compound_statement(void)
@@ -133,6 +163,7 @@ AST_T *compound_statement(void)
       case INT_T: var_declaration(); tree = NULL; break;
       case IDENT_T: tree = assignment_statement(); break;
       case IF_T: tree = if_statement(); break;
+      case WHILE_T: tree = while_statement(); break;
       case RBRACE_T: rbrace(); return (left);
       default: fatald("Syntax error, token", Token.token); 
     }

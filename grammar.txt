@@ -32,6 +32,7 @@ statement: print_statement
     |      declaration
     |      assignment_statement
     |      if_statement
+    |      while_statement
     ;
 
 print_statement: 'print' '(' expression ')' ';' 
@@ -51,4 +52,7 @@ if_head: 'if' '(' true_false_expression ')' compound_statement
     ;
 
 identifier: IDENT_T
+    ;
+
+while_statement: 'while' '(' true_false_expression ')' compound_statement
     ;
