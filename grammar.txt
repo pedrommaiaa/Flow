@@ -56,3 +56,6 @@ identifier: IDENT_T
 
 while_statement: 'while' '(' true_false_expression ')' compound_statement
     ;
+
+function_declaration: 'void' identifier '(' ')' compound_statement
+    ;

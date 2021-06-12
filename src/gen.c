@@ -113,6 +113,12 @@ int genAST(AST_T *n, int reg, int parentASTop)
         genAST(n->right, NOREG, n->op);
         genfreeregs();
         return (NOREG);
+    case FUNCTION_A:
+        // Generate the function's preamble before the code
+        cgfuncpreamble(Gsym[n->v.id].name);
+        genAST(n->left, NOREG, n->op);
+        cgfuncpostamble();
+        return (NOREG);
   }
   
   // Generate AST node handling below
@@ -162,11 +168,6 @@ int genAST(AST_T *n, int reg, int parentASTop)
 void genpreamble() 
 {
   cgpreamble();
-}
-
-void genpostamble() 
-{
-  cgpostamble();
 }
 
 void genfreeregs() 

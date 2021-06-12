@@ -4,6 +4,10 @@
 
 // Parsing of statements
 
+// Prototypes
+static AST_T *single_statement(void);
+
+
 // compound_statement:          // empty, i.e. no statement
 //      |      statement
 //      |      statement statements
@@ -35,8 +39,7 @@ static AST_T *print_statement(void)
   // Make an print AST tree
   tree = mkastunary(PRINT_A, tree, 0);
 
-  // Match the following semiclon
-  semi();
+  // Return the AST
   return (tree);
 }
 
@@ -66,9 +69,7 @@ static AST_T *assignment_statement(void)
   // Make an assignment AST tree
   tree = mkastnode(ASSIGN_A, left, NULL, right, 0);
 
-  // Match the following semicolon
-  // and return the AST
-  semi();
+  // Return the AST
   return (tree);
 } 
 
@@ -144,10 +145,24 @@ AST_T *while_statement(void)
   return (mkastnode(WHILE_A, condAST, NULL, bodyAST, 0));
 }
 
+// Parse a single statement
+// and return its AST
+static AST_T *single_statement(void)
+{
+  switch(Token.token)
+  {
+    case PRINT_T: return (print_statement());
+    case INT_T: var_declaration(); return (NULL); // No AST generated here
+    case IDENT_T: return (assignment_statement());
+    case IF_T: return (if_statement());
+    case WHILE_T: return (while_statement());
+    default: fatald("Syntax error, token", Token.token);
+  }
+}
 
 // Parse a compound statement
 // and return its AST
-AST_T *compound_statement(void)
+AST_T *compound_statement(void) 
 {
   AST_T *left = NULL;
   AST_T *tree;
@@ -155,27 +170,31 @@ AST_T *compound_statement(void)
   // Require a left curly bracket
   lbrace();
 
-  while (1)
+  while (1) 
   {
-    switch (Token.token)
-    {
-      case PRINT_T: tree = print_statement(); break;
-      case INT_T: var_declaration(); tree = NULL; break;
-      case IDENT_T: tree = assignment_statement(); break;
-      case IF_T: tree = if_statement(); break;
-      case WHILE_T: tree = while_statement(); break;
-      case RBRACE_T: rbrace(); return (left);
-      default: fatald("Syntax error, token", Token.token); 
-    }
+    // Parse a single statement
+    tree = single_statement();
+
+    // Some statements must be followed by a semicolon
+    if (tree != NULL && (tree->op == PRINT_A || tree->op == ASSIGN_A))
+      semi();
+
     // For each new tree, either save it in left
     // if left is empty, or glue the left and the
     // new tree together
-    if (tree)
+    if (tree != NULL) 
     {
       if (left == NULL)
-        left = tree;
+	      left = tree;
       else
-        left = mkastnode(GLUE_A, left, NULL, tree, 0);
+	      left = mkastnode(GLUE_A, left, NULL, tree, 0);
+    }
+    // When we hit a right curly bracket,
+    // skip past it and return the AST
+    if (Token.token == RBRACE_T) 
+    {
+      rbrace();
+      return (left);
     }
   }
 }
