@@ -8,21 +8,6 @@
 static AST_T *single_statement(void);
 
 
-// compound_statement:          // empty, i.e. no statement
-//      |      statement
-//      |      statement statements
-//      ;
-//
-// statement: print_statement
-//      |     declaration
-//      |     assignment_statement
-//      |     if_statement
-//      |     while_statement
-//      ;
-
-
-// print_statement: 'print' expression ';'  ;
-//
 static AST_T *print_statement(void)
 {
   AST_T *tree;
@@ -43,8 +28,6 @@ static AST_T *print_statement(void)
   return (tree);
 }
 
-// assignment_statement: identifier '=' expression ';'   ;
-//
 static AST_T *assignment_statement(void)
 {
   AST_T *left, *right, *tree;
@@ -74,12 +57,6 @@ static AST_T *assignment_statement(void)
 } 
 
 
-// if_statement: if_head
-//      |        if_head 'else' compound_statement
-//      ;
-//
-// if_head: 'if' '(' true_false_expression ')' compound_statement  ;
-//
 // Parse an IF statement including
 // any optional ELSE clause
 // and return its AST
@@ -116,8 +93,6 @@ AST_T *if_statement(void)
 }
 
 
-// while_statement: 'while' '(' true_false_expression ')' compound_statement ;
-//
 // Parse a WHILE statement
 // and return its AST
 AST_T *while_statement(void)
@@ -133,7 +108,6 @@ AST_T *while_statement(void)
   // and the ')' following. Ensure
   // the tree's operation is a comparison.
   condAST = binexpr(0);
-
   if (condAST->op < EQUAL_A || condAST->op > GREATER_OR_EQUAL_A)
     fatal("Bad comparison operator");
   rparen();
@@ -144,6 +118,50 @@ AST_T *while_statement(void)
   // Build and return the AST for this statement
   return (mkastnode(WHILE_A, condAST, NULL, bodyAST, 0));
 }
+
+
+// Parse a FOR statement
+// and return its AST
+static AST_T *for_statement(void)
+{
+  AST_T *condAST, *bodyAST;
+  AST_T *preopAST, *postopAST;
+  AST_T *tree;
+
+  // Ensure we have 'for' '('
+  match(FOR_T, "for");
+  lparen();
+
+  // Get the pre_op statement and the ';'
+  preopAST = single_statement();
+  semi();
+
+  // Get the condition and the ';'
+  condAST = binexpr(0);
+  if (condAST->op < EQUAL_A || condAST->op > GREATER_OR_EQUAL_A)
+    fatal("Bad comparison operator");
+  semi();
+
+  // Get the post_op statemetn and the ')'
+  postopAST = single_statement();
+  rparen();
+
+  // Get the compound statement which is the body
+  bodyAST = compound_statement();
+
+  // For now, all four sub-trees have to be non-NULL.
+  // Later on, I'll change the semantics for when some are missing
+  
+  // Glue the compound statement and the postop tree
+  tree = mkastnode(GLUE_A, bodyAST, NULL, postopAST, 0);
+
+  // Make a WHILE loop with the condition and this new body
+  tree = mkastnode(WHILE_A, condAST, NULL, tree, 0);
+
+  // And glue the preop tree to the WHILE_A tree
+  return (mkastnode(GLUE_A, preopAST, NULL, tree, 0));
+}
+
 
 // Parse a single statement
 // and return its AST
@@ -156,6 +174,7 @@ static AST_T *single_statement(void)
     case IDENT_T: return (assignment_statement());
     case IF_T: return (if_statement());
     case WHILE_T: return (while_statement());
+    case FOR_T: return (for_statement());
     default: fatald("Syntax error, token", Token.token);
   }
 }

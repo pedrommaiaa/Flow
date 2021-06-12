@@ -22,7 +22,7 @@ typedef struct token
     LBRACE_T, RBRACE_T, LPAREN_T, RPAREN_T,
     // Keywords
     PRINT_T, INT_T, IF_T, ELSE_T, WHILE_T,
-    VOID_T
+    FOR_T, VOID_T
   } token;            // Token types
   int intvalue;				// For T_INTLIT, the integer value
 } token_T;

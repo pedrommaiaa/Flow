@@ -41,6 +41,9 @@ print_statement: 'print' '(' expression ')' ';'
 declaration: 'int' identifier ';' 
     ;
 
+identifier: IDENT_T
+    ;
+
 assignment_statement: identifier '=' expression ';' 
     ;
 
@@ -51,11 +54,17 @@ if_statement: if_head
 if_head: 'if' '(' true_false_expression ')' compound_statement 
     ;
 
-identifier: IDENT_T
-    ;
 
 while_statement: 'while' '(' true_false_expression ')' compound_statement
     ;
+
+for_statement: 'for' preop_statement ';'
+                     true_false_expression ';'
+                     postop_statement ')' compound_statement 
+    ;
+
+preop_statement:  statement (for now)
+postop_statement: statement (for now)
 
 function_declaration: 'void' identifier '(' ')' compound_statement
     ;
