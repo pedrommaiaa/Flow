@@ -13,19 +13,24 @@ static AST_T *primary(void)
 
   switch (Token.token) 
   {
-    // For an INTLIT token, make a leaf AST node for it
-    case INTLIT_T: 
-          n = mkastleaf(INTLIT_A, Token.intvalue); 
-          break;
-    case IDENT_T:
-          // Check that this identifier exists
-          id = findglob(Text);
-          if (id == -1)
-            fatals("Unkown variable", Text);
+    case INTLIT_T:
+      // For an INTLIT token, make a leaf AST node for it.
+      // Make it a CHAR_P if it's within the CHAR_P range.
+      if ((Token.intvalue) >= 0 && (Token.intvalue < 256))
+        n = mkastleaf(INTLIT_A, CHAR_P, Token.intvalue);
+      else
+        n = mkastleaf(INTLIT_A, INT_P, Token.intvalue);
+      break;
 
-          // Make a leaf AST node for it
-          n = mkastleaf(IDENT_A, id);
-          break;
+    case IDENT_T:
+      // Check that this identifier exists
+      id = findglob(Text);
+      if (id == -1)
+        fatals("Unkown variable", Text);
+
+      // Make a leaf AST node for it
+      n = mkastleaf(IDENT_A, Gsym[id].type, id);
+      break;
     
     default:
       fatald("Syntax error, token", Token.token);
@@ -71,6 +76,7 @@ static int op_precedence(int tokentype)
 AST_T *binexpr(int ptp) 
 {
   AST_T *left, *right;
+  int lefttype, righttype;
   int tokentype;
 
   // Get the integer literal on the left.
@@ -93,9 +99,21 @@ AST_T *binexpr(int ptp)
     // precedence of our token to build a sub-tree
     right = binexpr(OpPrec[tokentype]);
 
+    // Ensure the two types are compatible.
+    lefttype = left->type;
+    righttype = right->type;
+    if (!type_compatible(&lefttype, &righttype, 0))
+      fatal("Incompatible types");
+
+    // Widen either side if required. type vars are WIDEN_A now
+    if (lefttype)
+      left = mkastunary(lefttype, right->type, left, 0);
+    if (righttype)
+      right = mkastunary(righttype, left->type, right, 0);
+
     // Join that sub-tree with ours. Convert the token
     // into an AST operation at the same time.
-    left = mkastnode(arithop(tokentype), left, NULL, right, 0);
+    left = mkastnode(arithop(tokentype), left->type, left, NULL, right, 0);
 
     // Update the details of the current token.
     // If we hit a semicolon or ')', return just the left node

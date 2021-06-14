@@ -11,6 +11,7 @@ static AST_T *single_statement(void);
 static AST_T *print_statement(void)
 {
   AST_T *tree;
+  int lefttype, righttype;
   int reg;
 
   // Match 'print' as the first token
@@ -21,8 +22,18 @@ static AST_T *print_statement(void)
   tree = binexpr(0);
   rparen();
 
+  // Ensure the two types are compatible.
+  lefttype = INT_P;
+  righttype = tree->type;
+  if (!type_compatible(&lefttype, &righttype, 0))
+    fatal("Incompatible types");
+
+  // Widen the tree if required.
+  if (righttype)
+    tree = mkastunary(righttype, INT_P, tree, 0);
+
   // Make an print AST tree
-  tree = mkastunary(PRINT_A, tree, 0);
+  tree = mkastunary(PRINT_A, NONE_P, tree, 0);
 
   // Return the AST
   return (tree);
@@ -31,6 +42,7 @@ static AST_T *print_statement(void)
 static AST_T *assignment_statement(void)
 {
   AST_T *left, *right, *tree;
+  int lefttype, righttype;
   int id;
 
   // Ensure we have an identifier
@@ -41,7 +53,7 @@ static AST_T *assignment_statement(void)
   {
     fatals("Undeclared variable", Text);
   }
-  right = mkastleaf(LVIDENT_A, id);
+  right = mkastleaf(LVIDENT_A, Gsym[id].type, id);
 
   // Ensure we have an equals sign
   match(ASSIGN_T, "=");
@@ -49,8 +61,18 @@ static AST_T *assignment_statement(void)
   // Parse the following expression
   left = binexpr(0);
 
+  // Ensure the two types are compatible.
+  lefttype = left->type;
+  righttype = right->type;
+  if (!type_compatible(&lefttype, &righttype, 1))
+    fatal("Incompatible types");
+
+  // Widen the left if required.
+  if (lefttype)
+    left = mkastunary(lefttype, right->type, left, 0);
+
   // Make an assignment AST tree
-  tree = mkastnode(ASSIGN_A, left, NULL, right, 0);
+  tree = mkastnode(ASSIGN_A, INT_P, left, NULL, right, 0);
 
   // Return the AST
   return (tree);
@@ -89,7 +111,7 @@ AST_T *if_statement(void)
     falseAST = compound_statement();
   } 
   // Build and return the AST for this statement
-  return (mkastnode(IF_A, condAST, trueAST, falseAST, 0));
+  return (mkastnode(IF_A, NONE_P, condAST, trueAST, falseAST, 0));
 }
 
 
@@ -116,7 +138,7 @@ AST_T *while_statement(void)
   bodyAST = compound_statement();
 
   // Build and return the AST for this statement
-  return (mkastnode(WHILE_A, condAST, NULL, bodyAST, 0));
+  return (mkastnode(WHILE_A, NONE_P, condAST, NULL, bodyAST, 0));
 }
 
 
@@ -153,13 +175,13 @@ static AST_T *for_statement(void)
   // Later on, I'll change the semantics for when some are missing
   
   // Glue the compound statement and the postop tree
-  tree = mkastnode(GLUE_A, bodyAST, NULL, postopAST, 0);
+  tree = mkastnode(GLUE_A, NONE_P, bodyAST, NULL, postopAST, 0);
 
   // Make a WHILE loop with the condition and this new body
-  tree = mkastnode(WHILE_A, condAST, NULL, tree, 0);
+  tree = mkastnode(WHILE_A, NONE_P, condAST, NULL, tree, 0);
 
   // And glue the preop tree to the WHILE_A tree
-  return (mkastnode(GLUE_A, preopAST, NULL, tree, 0));
+  return (mkastnode(GLUE_A, NONE_P, preopAST, NULL, tree, 0));
 }
 
 
@@ -170,6 +192,7 @@ static AST_T *single_statement(void)
   switch(Token.token)
   {
     case PRINT_T: return (print_statement());
+    case CHAR_T:
     case INT_T: var_declaration(); return (NULL); // No AST generated here
     case IDENT_T: return (assignment_statement());
     case IF_T: return (if_statement());
@@ -206,7 +229,7 @@ AST_T *compound_statement(void)
       if (left == NULL)
 	      left = tree;
       else
-	      left = mkastnode(GLUE_A, left, NULL, tree, 0);
+	      left = mkastnode(GLUE_A, NONE_P, left, NULL, tree, 0);
     }
     // When we hit a right curly bracket,
     // skip past it and return the AST

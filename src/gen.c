@@ -14,7 +14,7 @@ static int label(void)
 
 // Generate the code for an IF statement
 // and an optional ELSE clause
-static int genIFAST(AST_T *n)
+static int genIF(AST_T *n)
 {
   int Lfalse, Lend;
 
@@ -102,7 +102,7 @@ int genAST(AST_T *n, int reg, int parentASTop)
   switch (n->op)
   {
     case IF_A: 
-        return (genIFAST(n));
+        return (genIF(n));
     case WHILE_A:
         return (genWHILE(n));
     case GLUE_A:
@@ -150,9 +150,9 @@ int genAST(AST_T *n, int reg, int parentASTop)
         else
           return (cgcompare_and_set(n->op, leftreg, rightreg)); 
 
-    case INTLIT_A: return (cgloadint(n->v.intvalue));
-    case IDENT_A: return (cgloadglob(Gsym[n->v.id].name));
-    case LVIDENT_A: return (cgstorglob(reg, Gsym[n->v.id].name));
+    case INTLIT_A: return (cgloadint(n->v.intvalue, n->type));
+    case IDENT_A: return (cgloadglob(n->v.id));
+    case LVIDENT_A: return (cgstorglob(reg, n->v.id));
     case ASSIGN_A: return (rightreg);// The work has already been done, return the result
     case PRINT_A:
         // Print the left-child's value
@@ -160,6 +160,9 @@ int genAST(AST_T *n, int reg, int parentASTop)
         genprintint(leftreg);
         genfreeregs();
         return (NOREG);
+    case WIDEN_A:
+        // Widen the child's type to the parent's type
+        return (cgwiden(leftreg, n->left->type, n->type));
     default: fatald("Unknown AST operator", n->op);
   }
 }
@@ -180,7 +183,7 @@ void genprintint(int reg)
   cgprintint(reg);
 }
 
-void genglobsym(char *s) 
+void genglobsym(int id) 
 {
-  cgglobsym(s);
+  cgglobsym(id);
 }
