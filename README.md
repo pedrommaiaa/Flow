@@ -21,3 +21,7 @@ in production.
   5. General.
   6. Manual memory management.
 
+
+### To-Dos:
+- [ ] Change code generator from AT&T to Intel Syntax.
+

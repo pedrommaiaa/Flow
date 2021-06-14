@@ -10,7 +10,7 @@ clean:
 test: flow tests/bash/runtests.sh
 	(cd tests/bash; chmod +x runtests.sh; ./runtests.sh)
 
-test2: flow tests/input08
-	./flow tests/input08
+test2: flow tests/input01
+	./flow tests/input01
 	gcc -o out out.s
 	./out
