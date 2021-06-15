@@ -7,19 +7,16 @@
 
 // Parse the current token and
 // return a primitive type enum value
-int parse_type(int t)
-{
-  if (CHAR_T == t) return (CHAR_P);
-  if (INT_T == t)  return (INT_P);
-  if (LONG_T == t) return (LONG_P);
-  if (VOID_T == t) return (VOID_P);
-  fatald("Ilegal type, token", t);
+int parse_type(int t) {
+  if (t == CHAR_T) return (CHAR_P);
+  if (t == INT_T)  return (INT_P);
+  if (t == LONG_T) return (LONG_P);
+  if (t == VOID_T) return (VOID_P);
+  fatald("Illegal type, token", t);
 }
 
-
 // Parse the declaration of a variable
-void var_declaration(void)
-{
+void var_declaration(void) {
   int id, type;
 
   // Get the type of the variable, then the identifier
@@ -31,15 +28,13 @@ void var_declaration(void)
   // and generate its space in assembly
   id = addglob(Text, type, VARIABLE_S, 0);
   genglobsym(id);
-  // Get the trailing semicolon 
+  // Get the trailing semicolon
   semi();
 }
 
-// For now we have a very simplistic function definition grammar
 // Parse the declaration of a simplistic function
-AST_T *function_declaration(void)
-{
-  AST_T *tree, *finalstmt;
+struct ASTnode *function_declaration(void) {
+  struct ASTnode *tree, *finalstmt;
   int nameslot, type, endlabel;
 
   // Get the type of the variable, then the identifier
@@ -58,19 +53,18 @@ AST_T *function_declaration(void)
   lparen();
   rparen();
 
-  // Get the AST tree for compound statement
+  // Get the AST tree for the compound statement
   tree = compound_statement();
 
-  // If the function type isn't VOID_P, check that
+  // If the function type isn't P_VOID, check that
   // the last AST operation in the compound statement
   // was a return statement
-  if (type != VOID_P)
-  {
+  if (type != VOID_P) {
     finalstmt = (tree->op == GLUE_A) ? tree->right : tree;
     if (finalstmt == NULL || finalstmt->op != RETURN_A)
       fatal("No return for function with non-void type");
   }
-  // Return an FUNCTION_A node wich has the function's nameslot
-  // and the compound statemetn sub-tree
+  // Return an A_FUNCTION node which has the function's nameslot
+  // and the compound statement sub-tree
   return (mkastunary(FUNCTION_A, type, tree, nameslot));
 }

@@ -10,7 +10,7 @@ clean:
 test: flow tests/bash/runtests.sh
 	(cd tests/bash; chmod +x runtests.sh; ./runtests.sh)
 
-test2: flow tests/input01 lib/printint.c
-	./flow tests/input01 
+test2: flow tests/input14 lib/printint.c
+	./flow tests/input14
 	gcc -o out out.s lib/printint.c
 	./out

@@ -7,6 +7,6 @@ int main() {
   printint(10);
   result = fred(15);
   printint(result);
-  printint(fred(15)+10);
+  printint(fred(15) + 10);
   return(0);
 }
