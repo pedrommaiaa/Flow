@@ -11,7 +11,7 @@ for i in input*
 do if [ ! -f "out.$i" ]
    then
      ../flow $i
-     gcc -o out out.s
+     cc -o out out.s ../lib/printint.c
      ./out > out.$i
      rm -f out out.s
    fi

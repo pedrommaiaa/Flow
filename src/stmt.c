@@ -48,7 +48,14 @@ static AST_T *assignment_statement(void)
   // Ensure we have an identifier
   ident();
 
-  // Check it's been defined then make a leaf node for it
+  // This could be a variable or a function call.
+  // If next token is '(', it's a function call.
+  if (Token.token = LPAREN_T)
+    return (funccall());
+
+  // Not a function call, on with an assignment then
+  // Check the identifier has benn defined then make a leaf node for it
+  // XXX Add structural type test
   if ((id = findglob(Text)) == -1)
   {
     fatals("Undeclared variable", Text);
@@ -185,6 +192,42 @@ static AST_T *for_statement(void)
 }
 
 
+// Parse a return statement and return its AST
+static AST_T *return_statement(void)
+{
+  AST_T *tree;
+  int returntype, functype;
+
+  // Can't return a value if function returns VOID_P
+  if (Gsym[Functionid].type == VOID_P)
+    fatal("Can't return from a void function");
+
+  // Ensure we have 'return' '('
+  match(RETURN_T, "return");
+  lparen();
+
+  // Parse the following expression
+  tree = binexpr(0);
+
+  // Ensure this is compatible with the function's type
+  returntype = tree->type;
+  functype = Gsym[Functionid].type;
+  if (!type_compatible(&returntype, &functype, 1))
+    fatal("Incompatible types");
+
+  // Widen the left if required
+  if (returntype)
+    tree = mkastunary(returntype, functype, tree, 0);
+
+  // Add on the RETURN_A node
+  tree = mkastunary(RETURN_A, NONE_P, tree, 0); 
+
+  // Get the ')'
+  rparen();
+  return (tree);
+}
+
+
 // Parse a single statement
 // and return its AST
 static AST_T *single_statement(void)
@@ -193,11 +236,13 @@ static AST_T *single_statement(void)
   {
     case PRINT_T: return (print_statement());
     case CHAR_T:
-    case INT_T: var_declaration(); return (NULL); // No AST generated here
+    case INT_T:
+    case LONG_T: var_declaration(); return (NULL); // No AST generated here
     case IDENT_T: return (assignment_statement());
     case IF_T: return (if_statement());
     case WHILE_T: return (while_statement());
     case FOR_T: return (for_statement());
+    case RETURN_T: return (return_statement());
     default: fatald("Syntax error, token", Token.token);
   }
 }
@@ -218,7 +263,8 @@ AST_T *compound_statement(void)
     tree = single_statement();
 
     // Some statements must be followed by a semicolon
-    if (tree != NULL && (tree->op == PRINT_A || tree->op == ASSIGN_A))
+    if (tree != NULL && (tree->op == PRINT_A || tree->op == ASSIGN_A ||
+                         tree->op == RETURN_A || tree->op == FUNCCALL_A))
       semi();
 
     // For each new tree, either save it in left

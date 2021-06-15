@@ -6,7 +6,7 @@
 
 
 // Generate and return a new label number
-static int label(void)
+int genlabel(void)
 {
   static int id = 1;
   return (id++);
@@ -23,9 +23,9 @@ static int genIF(AST_T *n)
   // for the end of the overall IF statement.
   // When there is no ELSE clause, Lfalse _is_
   // the ending label;
-  Lfalse = label();
+  Lfalse = genlabel();
   if (n->right)
-    Lend = label();
+    Lend = genlabel();
 
   // Generate the condition code followed
   // by a zero jump to the false label.
@@ -68,8 +68,8 @@ static int genWHILE(AST_T *n)
 
   // Generate the start and end labels
   // and output the start label
-  Lstart = label();
-  Lend = label();
+  Lstart = genlabel();
+  Lend = genlabel();
   cglabel(Lstart);
 
   // Generate the condition code followed
@@ -101,24 +101,22 @@ int genAST(AST_T *n, int reg, int parentASTop)
   // We now have specific AST node handling at the top
   switch (n->op)
   {
-    case IF_A: 
-        return (genIF(n));
-    case WHILE_A:
-        return (genWHILE(n));
+    case IF_A: return (genIF(n));
+    case WHILE_A: return (genWHILE(n));
     case GLUE_A:
-        // Do each child statement, and free the
-        // registers after each child
-        genAST(n->left, NOREG, n->op);
-        genfreeregs();
-        genAST(n->right, NOREG, n->op);
-        genfreeregs();
-        return (NOREG);
+      // Do each child statement, and free the
+      // registers after each child
+      genAST(n->left, NOREG, n->op);
+      genfreeregs();
+      genAST(n->right, NOREG, n->op);
+      genfreeregs();
+      return (NOREG);
     case FUNCTION_A:
-        // Generate the function's preamble before the code
-        cgfuncpreamble(Gsym[n->v.id].name);
-        genAST(n->left, NOREG, n->op);
-        cgfuncpostamble();
-        return (NOREG);
+      // Generate the function's preamble before the code
+      cgfuncpreamble(n->v.id);
+      genAST(n->left, NOREG, n->op);
+      cgfuncpostamble(n->v.id);
+      return (NOREG);
   }
   
   // Generate AST node handling below
@@ -163,6 +161,11 @@ int genAST(AST_T *n, int reg, int parentASTop)
     case WIDEN_A:
         // Widen the child's type to the parent's type
         return (cgwiden(leftreg, n->left->type, n->type));
+    case RETURN_A:
+        cgreturn(leftreg, Functionid);
+        return (NOREG);
+    case FUNCCALL_A:
+        return (cgcall(leftreg, n->v.id));
     default: fatald("Unknown AST operator", n->op);
   }
 }
@@ -186,4 +189,9 @@ void genprintint(int reg)
 void genglobsym(int id) 
 {
   cgglobsym(id);
+}
+
+int genprimsize(int type)
+{
+  return (cgprimsize(type));
 }

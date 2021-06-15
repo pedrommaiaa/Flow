@@ -4,6 +4,37 @@
 
 // Parsing of expressions
 
+// Parse a function call with a single expression
+// argument and return its AST
+AST_T *funccall(void)
+{
+  AST_T *tree;
+  int id;
+
+  // Check that the identifier has been defined,
+  // then make a leaf node for it. XXX Add structural type test
+  if ((id = findglob(Text)) == -1)
+  {
+    fatals("Undeclared function", Text);
+  }
+  // Get the '('
+  lparen();
+
+  // Parse the following expression
+  tree = binexpr(0);
+
+  // Build the function call AST node. Store the
+  // function's return type as this node's type.
+  // Also record the function's symbol-id
+  tree = mkastunary(FUNCCALL_A, Gsym[id].type, tree, id);
+
+  // Get the ')'
+  rparen();
+  return (tree);
+}
+
+
+
 // Parse a primary factor and return an
 // AST node representing it.
 static AST_T *primary(void) 
@@ -23,7 +54,18 @@ static AST_T *primary(void)
       break;
 
     case IDENT_T:
-      // Check that this identifier exists
+      // This could be a variable or a function call.
+      // Scan in the next otken to find out
+      scan(&Token);
+
+      // It's a '(', so function call
+      if (Token.token == LPAREN_T)
+        return (funccall());
+
+      // Not a function call, so reject the new token
+      reject_token(&Token);
+     
+      // Check that the variable exists. XXX Add structural type test 
       id = findglob(Text);
       if (id == -1)
         fatals("Unkown variable", Text);

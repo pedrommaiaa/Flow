@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+# Run each test and compare
+# against known good output
 
 cd ../
 
@@ -12,7 +14,7 @@ do if [ ! -f "out.$i" ]
    else
      echo -n $i
      ../flow $i
-     cc -o out out.s
+     cc -o out out.s ../lib/printint.c
      ./out > trial.$i
      cmp -s "out.$i" "trial.$i"
      if [ "$?" -eq "1" ]

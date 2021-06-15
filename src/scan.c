@@ -125,9 +125,17 @@ static int keyword(char *s)
       if (!strcmp(s, "int"))
         return INT_T;
       break;
+    case 'l':
+      if (!strcmp(s, "long"))
+        return LONG_T;
+      break;
     case 'p':
       if (!strcmp(s, "print"))
         return PRINT_T;
+      break;
+    case 'r':
+      if (!strcmp(s, "return"))
+        return RETURN_T;
       break;
     case 'w':
       if (!strcmp(s, "while"))
@@ -141,6 +149,17 @@ static int keyword(char *s)
   return (0);
 }
 
+// A pointer to a rejected token
+static token_T *Rejtoken = NULL;
+
+// Reject the token that we just scanned
+void reject_token(token_T *t)
+{
+  if (Rejtoken != NULL)
+    fatal("Can't reject token twice");
+  Rejtoken = t;
+}
+
 
 
 // Scan and return the next token found in the input.
@@ -148,6 +167,14 @@ static int keyword(char *s)
 int scan(token_T *t) 
 {
   int c, tokentype;
+
+  // If we have any rejected token, return it
+  if (Rejtoken != NULL)
+  {
+    t = Rejtoken;
+    Rejtoken = NULL;
+    return (1);
+  }
 
   // Skip whitespace
   c = skip();

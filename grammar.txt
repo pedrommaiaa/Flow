@@ -68,3 +68,9 @@ postop_statement: statement (for now)
 
 function_declaration: 'void' identifier '(' ')' compound_statement
     ;
+
+function_call : identifier '(' expression ')' 
+    ;
+
+return_statement: 'return' '(' expression ')' 
+    ;
