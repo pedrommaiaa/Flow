@@ -1,15 +1,17 @@
 // Function prototypes for all compiler files
+
 // scan.c
 void reject_token(token_T *t);
 int scan(token_T *t);
 
 // tree.c
-AST_T *mkastnode(int op, int type, 
-                 AST_T *left, 
-                 AST_T *mid, 
-                 AST_T *right, int intvalue);
+AST_T *mkastnode(int op, int type,
+			  AST_T *left,
+			  AST_T *mid,
+			  AST_T *right, int intvalue);
 AST_T *mkastleaf(int op, int type, int intvalue);
-AST_T *mkastunary(int op, int type, AST_T *left, int intvalue);
+AST_T *mkastunary(int op, int type,
+			    AST_T *left, int intvalue);
 
 // gen.c
 int genlabel(void);

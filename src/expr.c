@@ -6,8 +6,8 @@
 
 // Parse a function call with a single expression
 // argument and return its AST
-AST_T *funccall(void) {
-  AST_T *tree;
+struct ASTnode *funccall(void) {
+  struct ASTnode *tree;
   int id;
 
   // Check that the identifier has been defined,
@@ -33,18 +33,18 @@ AST_T *funccall(void) {
 
 // Parse a primary factor and return an
 // AST node representing it.
-static AST_T *primary(void) {
-  AST_T *n;
+static struct ASTnode *primary(void) {
+  struct ASTnode *n;
   int id;
 
   switch (Token.token) {
     case INTLIT_T:
       // For an INTLIT token, make a leaf AST node for it.
-      // Make it a P_CHAR if it's within the P_CHAR range
+      // Make it a CHAR_P if it's within the CHAR_P range
       if ((Token.intvalue) >= 0 && (Token.intvalue < 256))
-	      n = mkastleaf(INTLIT_A, CHAR_P, Token.intvalue);
+	n = mkastleaf(INTLIT_A, CHAR_P, Token.intvalue);
       else
-	      n = mkastleaf(INTLIT_A, INT_P, Token.intvalue);
+	n = mkastleaf(INTLIT_A, INT_P, Token.intvalue);
       break;
 
     case IDENT_T:
@@ -89,7 +89,7 @@ static int arithop(int tokentype) {
 // Operator precedence for each token. Must
 // match up with the order of tokens in defs.h
 static int OpPrec[] = {
-  0, 10, 10,			  // T_EOF, T_PLUS, T_MINUS
+  0, 10, 10,			  // EOF_T, T_PLUS, T_MINUS
   20, 20,			      // T_STAR, T_SLASH
   30, 30,			      // T_EQ, T_NE
   40, 40, 40, 40		// T_LT, T_GT, T_LE, T_GE
@@ -106,8 +106,8 @@ static int op_precedence(int tokentype) {
 
 // Return an AST tree whose root is a binary operator.
 // Parameter ptp is the previous token's precedence.
-AST_T *binexpr(int ptp) {
-  AST_T *left, *right;
+struct ASTnode *binexpr(int ptp) {
+  struct ASTnode *left, *right;
   int lefttype, righttype;
   int tokentype;
 

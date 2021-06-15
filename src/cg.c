@@ -170,7 +170,7 @@ int cgstorglob(int r, int id) {
 }
 
 // Array of type sizes in P_XXX order.
-// 0 means no size. NONE_P, VOID_P, CHAR_P, INT_P, LONG_P
+// 0 means no size.
 static int psize[] = { 0, 0, 1, 4, 8 };
 
 // Given a P_XXX type value, return the
@@ -192,8 +192,7 @@ void cgglobsym(int id) {
 }
 
 // List of comparison instructions,
-// in AST order: EQUAL_A, NOT_EQUAL_A, LESS_THAN_A, GREATER_THAN_A,
-// LESS_OR_EQUAL_A, GREATER_OR_EQUAL_A
+// in AST order: EQUAL_A, NOT_EQUAL_A, LESS_THAN_A, GREATER_THAN_A, LESS_OR_EQUAL_A, GREATER_OR_EQUAL_A
 static char *cmplist[] =
   { "sete", "setne", "setl", "setg", "setle", "setge" };
 
@@ -222,8 +221,7 @@ void cgjump(int l) {
 }
 
 // List of inverted jump instructions,
-// in AST order: EQUAL_A, NOT_EQUAL_A, LESS_THAN_A, GREATER_THAN_A,
-// LESS_OR_EQUAL_A, GREATER_OR_EQUAL_A
+// in AST order: EQUAL_A, NOT_EQUAL_A, LESS_THAN_A, GREATER_THAN_A, LESS_OR_EQUAL_A, GREATER_OR_EQUAL_A
 static char *invcmplist[] = { "jne", "je", "jge", "jle", "jg", "jl" };
 
 // Compare two registers and jump if false.
