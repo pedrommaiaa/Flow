@@ -89,16 +89,17 @@ static int arithop(int tokentype)
   if (tokentype > EOF_T && tokentype < INTLIT_T)
     return (tokentype);
   fatald("Syntax error, token", tokentype);
+  return (0); // Keep -Wall happy
 }
 
 // Operator precedence for each token. Must
 // match up with the order of tokens in defs.h
 static int OpPrec[] = 
 {
-  0, 10, 10,			  // EOF_T, T_PLUS, T_MINUS
-  20, 20,			      // T_STAR, T_SLASH
-  30, 30,			      // T_EQ, T_NE
-  40, 40, 40, 40		// T_LT, T_GT, T_LE, T_GE
+  0, 10, 10,			  // EOF_T, PLUS_T, MINUS_T
+  20, 20,			      // STAR_T, SLASH_T
+  30, 30,			      // EQUAL_T, NOT_EQUAL_T
+  40, 40, 40, 40		// LESS_THAN_T, GREATER_THAN_T, LESS_OR_EQUAL_T, GREATER_OR_EQUAL_T
 };
 
 // Check that we have a binary operator and
@@ -111,6 +112,52 @@ static int op_precedence(int tokentype)
   return (prec);
 }
 
+
+// Parse a prefix expression and return
+// a sub-tree representing it.
+AST_T *prefix(void)
+{
+  AST_T *tree;
+  switch (Token.token)
+  {
+    case AMPER_T:
+      // Get the next token and parse it
+      // recursively as a prefix expression
+      scan(&Token);
+      tree = prefix();
+
+      // Ensure that it's an identifier
+      if (tree->op != IDENT_A)
+        fatal("& operator must be followed by an identifier");
+
+      // Now change the operator to ADDR_A and the type 
+      // to a pointer to the original type
+      tree->op = ADDR_A; 
+      tree->type = pointer_to(tree->type);
+      break;
+    
+    case STAR_T:
+      // Get the next token and parse it
+      // recursively as a prefix expression
+      scan(&Token);
+      tree = prefix();
+
+      // For now, ensure it's either another deref or
+      // an identifier
+      if (tree->op != IDENT_A && tree->op != DEREF_A)
+        fatal("* operator must be followed by an identifier or *");
+
+      // Prepend an DEREF_A operation to the tree
+      tree = mkastunary(DEREF_A, value_at(tree->type), tree, 0);
+      break;
+    
+    default: tree = primary();
+  }
+  return (tree);
+}
+
+
+
 // Return an AST tree whose root is a binary operator.
 // Parameter ptp is the previous token's precedence.
 AST_T *binexpr(int ptp) 
@@ -119,9 +166,9 @@ AST_T *binexpr(int ptp)
   int lefttype, righttype;
   int tokentype;
 
-  // Get the primary tree on the left.
+  // Get the tree on the left.
   // Fetch the next token at the same time.
-  left = primary();
+  left = prefix();
 
   // If we hit a semicolon or ')', return just the left node
   tokentype = Token.token;

@@ -74,3 +74,10 @@ function_call : identifier '(' expression ')'
 
 return_statement: 'return' '(' expression ')' 
     ;
+
+
+prefix_expression: primary
+    | '*' prefix_expression
+    | '%' prefix_expression
+    ;
+

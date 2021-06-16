@@ -49,3 +49,37 @@ int type_compatible(int *left, int *right, int onlyright)
   *left = *right = 0;
   return (1);
 }
+
+
+// Given a primitive type, return
+// the type which is a pointer to it
+int pointer_to(int type)
+{
+  int newtype;
+  switch (type)
+  {
+    case VOID_P: newtype = VOIDPTR_P; break;
+    case CHAR_P: newtype = CHARPTR_P; break;
+    case INT_P:  newtype = INTPTR_P;  break;
+    case LONG_P: newtype = LONGPTR_P; break;
+    default: fatald("Unrecognised in pointer_to: type", type);
+  }
+  return (newtype);
+}
+
+
+// Given a primitive pointer type, return
+// the type which it points to
+int value_at(int type)
+{
+  int newtype;
+  switch (type)
+  {
+    case VOIDPTR_P: newtype = VOID_P; break;
+    case CHARPTR_P: newtype = CHAR_P; break;
+    case INTPTR_P:  newtype = INT_P;  break;
+    case LONGPTR_P: newtype = LONG_P; break;
+    default: fatald("Unrecognised in value_at: type", type);
+  }
+  return (newtype);
+}

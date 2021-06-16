@@ -97,10 +97,8 @@ int genAST(AST_T *n, int reg, int parentASTop)
   // We now have specific AST node handling at the top
   switch (n->op) 
   {
-    case IF_A:
-      return (genIF(n));
-    case WHILE_A:
-      return (genWHILE(n));
+    case IF_A: return (genIF(n));
+    case WHILE_A: return (genWHILE(n));
     case GLUE_A:
       // Do each child statement, and free the
       // registers after each child
@@ -127,14 +125,10 @@ int genAST(AST_T *n, int reg, int parentASTop)
 
   switch (n->op) 
   {
-    case ADD_A:
-      return (cgadd(leftreg, rightreg));
-    case SUB_A:
-      return (cgsub(leftreg, rightreg));
-    case MUL_A:
-      return (cgmul(leftreg, rightreg));
-    case DIV_A:
-      return (cgdiv(leftreg, rightreg));
+    case ADD_A: return (cgadd(leftreg, rightreg));
+    case SUB_A: return (cgsub(leftreg, rightreg));
+    case MUL_A: return (cgmul(leftreg, rightreg));
+    case DIV_A: return (cgdiv(leftreg, rightreg));
     case EQUAL_A:
     case NOT_EQUAL_A:
     case LESS_THAN_A:
@@ -148,50 +142,47 @@ int genAST(AST_T *n, int reg, int parentASTop)
 	      return (cgcompare_and_jump(n->op, leftreg, rightreg, reg));
       else
 	      return (cgcompare_and_set(n->op, leftreg, rightreg));
-    case INTLIT_A:
-      return (cgloadint(n->v.intvalue, n->type));
-    case IDENT_A:
-      return (cgloadglob(n->v.id));
-    case LVIDENT_A:
-      return (cgstorglob(reg, n->v.id));
-    case ASSIGN_A:
-      // The work has already been done, return the result
-      return (rightreg);
-    case PRINT_A:
-      // Print the left-child's value
-      // and return no register
-      genprintint(leftreg);
-      genfreeregs();
-      return (NOREG);
-    case WIDEN_A:
-      // Widen the child's type to the parent's type
-      return (cgwiden(leftreg, n->left->type, n->type));
-    case RETURN_A:
-      cgreturn(leftreg, Functionid);
-      return (NOREG);
-    case FUNCCALL_A:
-      return (cgcall(leftreg, n->v.id));
+    case INTLIT_A: return (cgloadint(n->v.intvalue, n->type));
+    case IDENT_A: return (cgloadglob(n->v.id));
+    case LVIDENT_A: return (cgstorglob(reg, n->v.id));
+    case ASSIGN_A: return (rightreg); // The work has already been done, return the result
+    case PRINT_A: genprintint(leftreg); genfreeregs(); return (NOREG); // Print the left-child's value and return no register
+    case WIDEN_A: return (cgwiden(leftreg, n->left->type, n->type)); // Widen the child's type to the parent's type
+    case RETURN_A: cgreturn(leftreg, Functionid); return (NOREG);
+    case FUNCCALL_A: return (cgcall(leftreg, n->v.id));
+    case ADDR_A: return (cgaddress(n->v.id));
+    case DEREF_A: return (cgderef(leftreg, n->left->type));
     default:
       fatald("Unknown AST operator", n->op);
   }
+  return (NOREG); // Keep -Wall happy
 }
 
 void genpreamble() 
 {
   cgpreamble();
 }
+void genpostamble()
+{
+  cgpostamble();
+}
+
+
 void genfreeregs() 
 {
   freeall_registers();
 }
+
 void genprintint(int reg) 
 {
   cgprintint(reg);
 }
+
 void genglobsym(int id) 
 {
   cgglobsym(id);
 }
+
 int genprimsize(int type) 
 {
   return (cgprimsize(type));

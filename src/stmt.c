@@ -11,7 +11,6 @@ static AST_T *print_statement(void)
 {
   AST_T *tree;
   int lefttype, righttype;
-  int reg;
 
   // Match a 'print' as the first token
   // And ensure '('
@@ -236,6 +235,7 @@ static AST_T *single_statement(void)
     default:
       fatald("Syntax error, token", Token.token);
   }
+  return (NULL); // Keep -Wall happy
 }
 
 // Parse a compound statement

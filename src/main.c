@@ -23,7 +23,7 @@ static void usage(char *prog) {
 // Main program: check arguments and print a usage
 // if we don't have an argument. Open up the input
 // file and call scanfile() to scan the tokens in it.
-void main(int argc, char *argv[]) 
+int main(int argc, char *argv[]) 
 {
   AST_T *tree;
 
@@ -57,7 +57,8 @@ void main(int argc, char *argv[])
     genAST(tree, NOREG, 0);          // Generate the assembly code for it
     if (Token.token == EOF_T)        // Stop when we have reached EOF
       break;
-  } 
+  }
+  genpostamble();
   fclose(Outfile);                   // Close the output file and exit
-  exit(0);
+  return(0);
 }

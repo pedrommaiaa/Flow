@@ -27,6 +27,7 @@ void genreturn(int reg, int id);
 // cg.c
 void freeall_registers(void);
 void cgpreamble();
+void cgpostamble();
 void cgfuncpreamble(int id);
 void cgfuncpostamble(int id);
 int cgloadint(int value, int type);
@@ -46,6 +47,8 @@ void cgjump(int l);
 int cgwiden(int r, int oldtype, int newtype);
 int cgprimsize(int type);
 void cgreturn(int reg, int id);
+int cgaddress(int id);
+int cgderef(int r, int type);
 
 // expr.c
 AST_T *funccall(void);
@@ -77,3 +80,5 @@ AST_T *function_declaration(void);
 
 // types.c
 int type_compatible(int *left, int *right, int onlyright);
+int pointer_to(int type);
+int value_at(int type);

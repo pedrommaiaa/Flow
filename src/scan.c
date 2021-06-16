@@ -106,6 +106,10 @@ static int scanident(int c, char *buf, int lim)
 static int keyword(char *s) 
 {
   switch (*s) {
+    case 'a': 
+      if (!strcmp(s, "and"))
+	      return (AND_T);
+      break;
     case 'c': 
       if (!strcmp(s, "char"))
 	      return (CHAR_T);
@@ -149,10 +153,10 @@ static int keyword(char *s)
 }
 
 // A pointer to a rejected token
-static struct token *Rejtoken = NULL;
+static token_T *Rejtoken = NULL;
 
 // Reject the token that we just scanned
-void reject_token(struct token *t) 
+void reject_token(token_T *t) 
 {
   if (Rejtoken != NULL)
     fatal("Can't reject token twice");
@@ -161,7 +165,7 @@ void reject_token(struct token *t)
 
 // Scan and return the next token found in the input.
 // Return 1 if token valid, 0 if no tokens left.
-int scan(struct token *t) 
+int scan(token_T *t) 
 {
   int c, tokentype;
 
@@ -189,6 +193,7 @@ int scan(struct token *t)
     case '}': t->token = RBRACE_T; break;
     case '(': t->token = LPAREN_T; break;
     case ')': t->token = RPAREN_T; break;
+    case '&': t->token = AMPER_T; break;
     case '=': if ((c = next()) == '=') t->token = EQUAL_T; else t->token = ASSIGN_T; break; 
     case '!': if ((c = next()) == '=') t->token = NOT_EQUAL_T; else fatalc("Unrecognised character", c); break;
     case '<': if ((c = next()) == '=') t->token = LESS_OR_EQUAL_T; else t->token = LESS_THAN_T; break;
@@ -209,7 +214,7 @@ int scan(struct token *t)
 	      scanident(c, Text, TEXTLEN);
 
 	      // If it's a recognised keyword, return that token
-	      if (tokentype = keyword(Text)) 
+	      if ((tokentype = keyword(Text))) 
         {
 	        t->token = tokentype;
 	        break;

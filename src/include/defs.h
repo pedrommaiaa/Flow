@@ -5,7 +5,7 @@
 
 // Structure and enum definitions
 
-#define TEXTLEN		      512	// Length of symbols in input
+#define TEXTLEN		      512	  // Length of symbols in input
 #define NSYMBOLS        1024	// Number of symbol table entries
 
 
@@ -23,8 +23,10 @@ typedef struct token {
     // Structural tokens
     INTLIT_T, SEMI_T, ASSIGN_T, IDENT_T,
     LBRACE_T, RBRACE_T, LPAREN_T, RPAREN_T,
+    AMPER_T,
     // Other keywords
-    PRINT_T, IF_T, ELSE_T, WHILE_T, FOR_T, RETURN_T
+    PRINT_T, IF_T, ELSE_T, WHILE_T, FOR_T, RETURN_T,
+    AND_T
   } token;          // Token type, from the enum list above			
   int intvalue;			// For INTLIT_T, the integer value
 } token_T;
@@ -33,7 +35,8 @@ typedef struct token {
 
 // Primitive types
 enum {
-  NONE_P, VOID_P, CHAR_P, INT_P, LONG_P
+  NONE_P, VOID_P, CHAR_P, INT_P, LONG_P,
+  VOIDPTR_P, CHARPTR_P, INTPTR_P, LONGPTR_P
 };
 
 // Abstract Syntax Tree structure
@@ -46,7 +49,7 @@ typedef struct ASTnode {
     INTLIT_A,
     IDENT_A, LVIDENT_A, ASSIGN_A, PRINT_A, GLUE_A,
     IF_A, WHILE_A, FUNCTION_A, WIDEN_A, RETURN_A,
-    FUNCCALL_A
+    FUNCCALL_A, DEREF_A, ADDR_A
   }op;			              // "Operation" to be performed on this tree
   int type;			          // Type of any expression this tree generates
   struct ASTnode *left;		// Left, middle and right child trees
@@ -58,11 +61,9 @@ typedef struct ASTnode {
   } v;				            // For FUNCCALL, the symbol slot number
 } AST_T;
 
+
 #define NOREG	-1		// Use NOREG when the AST generation
-				// functions have no register to return
-
-
-
+				            // functions have no register to return
 
 // Symbol table structure
 typedef struct symtable {
