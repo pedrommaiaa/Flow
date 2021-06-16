@@ -6,13 +6,15 @@
 
 // Parse a function call with a single expression
 // argument and return its AST
-struct ASTnode *funccall(void) {
-  struct ASTnode *tree;
+AST_T *funccall(void) 
+{
+  AST_T *tree;
   int id;
 
   // Check that the identifier has been defined,
   // then make a leaf node for it. XXX Add structural type test
-  if ((id = findglob(Text)) == -1) {
+  if ((id = findglob(Text)) == -1) 
+  {
     fatals("Undeclared function", Text);
   }
   // Get the '('
@@ -33,18 +35,20 @@ struct ASTnode *funccall(void) {
 
 // Parse a primary factor and return an
 // AST node representing it.
-static struct ASTnode *primary(void) {
-  struct ASTnode *n;
+static AST_T *primary(void) 
+{
+  AST_T *n;
   int id;
 
-  switch (Token.token) {
+  switch (Token.token) 
+  {
     case INTLIT_T:
       // For an INTLIT token, make a leaf AST node for it.
       // Make it a CHAR_P if it's within the CHAR_P range
       if ((Token.intvalue) >= 0 && (Token.intvalue < 256))
-	n = mkastleaf(INTLIT_A, CHAR_P, Token.intvalue);
+	      n = mkastleaf(INTLIT_A, CHAR_P, Token.intvalue);
       else
-	n = mkastleaf(INTLIT_A, INT_P, Token.intvalue);
+	      n = mkastleaf(INTLIT_A, INT_P, Token.intvalue);
       break;
 
     case IDENT_T:
@@ -54,7 +58,7 @@ static struct ASTnode *primary(void) {
 
       // It's a '(', so a function call
       if (Token.token == LPAREN_T)
-	return (funccall());
+	      return (funccall());
 
       // Not a function call, so reject the new token
       reject_token(&Token);
@@ -62,7 +66,7 @@ static struct ASTnode *primary(void) {
       // Check that the variable exists. XXX Add structural type test
       id = findglob(Text);
       if (id == -1)
-	fatals("Unknown variable", Text);
+	      fatals("Unknown variable", Text);
 
       // Make a leaf AST node for it
       n = mkastleaf(IDENT_A, Gsym[id].type, id);
@@ -80,7 +84,8 @@ static struct ASTnode *primary(void) {
 
 // Convert a binary operator token into an AST operation.
 // We rely on a 1:1 mapping from token to AST operation
-static int arithop(int tokentype) {
+static int arithop(int tokentype) 
+{
   if (tokentype > EOF_T && tokentype < INTLIT_T)
     return (tokentype);
   fatald("Syntax error, token", tokentype);
@@ -88,7 +93,8 @@ static int arithop(int tokentype) {
 
 // Operator precedence for each token. Must
 // match up with the order of tokens in defs.h
-static int OpPrec[] = {
+static int OpPrec[] = 
+{
   0, 10, 10,			  // EOF_T, T_PLUS, T_MINUS
   20, 20,			      // T_STAR, T_SLASH
   30, 30,			      // T_EQ, T_NE
@@ -97,7 +103,8 @@ static int OpPrec[] = {
 
 // Check that we have a binary operator and
 // return its precedence.
-static int op_precedence(int tokentype) {
+static int op_precedence(int tokentype) 
+{
   int prec = OpPrec[tokentype];
   if (prec == 0)
     fatald("Syntax error, token", tokentype);
@@ -106,8 +113,9 @@ static int op_precedence(int tokentype) {
 
 // Return an AST tree whose root is a binary operator.
 // Parameter ptp is the previous token's precedence.
-struct ASTnode *binexpr(int ptp) {
-  struct ASTnode *left, *right;
+AST_T *binexpr(int ptp) 
+{
+  AST_T *left, *right;
   int lefttype, righttype;
   int tokentype;
 
@@ -122,7 +130,8 @@ struct ASTnode *binexpr(int ptp) {
 
   // While the precedence of this token is
   // more than that of the previous token precedence
-  while (op_precedence(tokentype) > ptp) {
+  while (op_precedence(tokentype) > ptp) 
+  {
     // Fetch in the next integer literal
     scan(&Token);
 

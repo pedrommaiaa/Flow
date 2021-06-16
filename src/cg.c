@@ -12,15 +12,19 @@ static char *breglist[4] = { "%r8b", "%r9b", "%r10b", "%r11b" };
 static char *dreglist[4] = { "%r8d", "%r9d", "%r10d", "%r11d" };
 
 // Set all registers as available
-void freeall_registers(void) {
+void freeall_registers(void) 
+{
   freereg[0] = freereg[1] = freereg[2] = freereg[3] = 1;
 }
 
 // Allocate a free register. Return the number of
 // the register. Die if no available registers.
-static int alloc_register(void) {
-  for (int i = 0; i < 4; i++) {
-    if (freereg[i]) {
+static int alloc_register(void) 
+{
+  for (int i = 0; i < 4; i++) 
+  {
+    if (freereg[i]) 
+    {
       freereg[i] = 0;
       return (i);
     }
@@ -30,20 +34,23 @@ static int alloc_register(void) {
 
 // Return a register to the list of available registers.
 // Check to see if it's not already there.
-static void free_register(int reg) {
+static void free_register(int reg) 
+{
   if (freereg[reg] != 0)
     fatald("Error trying to free register", reg);
   freereg[reg] = 1;
 }
 
 // Print out the assembly preamble
-void cgpreamble() {
+void cgpreamble() 
+{
   freeall_registers();
   fputs("\t.text\n", Outfile);
 }
 
 // Print out a function preamble
-void cgfuncpreamble(int id) {
+void cgfuncpreamble(int id) 
+{
   char *name = Gsym[id].name;
   fprintf(Outfile,
 	  "\t.text\n"
@@ -54,7 +61,8 @@ void cgfuncpreamble(int id) {
 }
 
 // Print out a function postamble
-void cgfuncpostamble(int id) {
+void cgfuncpostamble(int id) 
+{
   cglabel(Gsym[id].endlabel);
   fputs("\tpopq	%rbp\n" "\tret\n", Outfile);
 }
@@ -62,7 +70,8 @@ void cgfuncpostamble(int id) {
 // Load an integer literal value into a register.
 // Return the number of the register.
 // For x86-64, we don't need to worry about the type.
-int cgloadint(int value, int type) {
+int cgloadint(int value, int type) 
+{
   // Get a new register
   int r = alloc_register();
 
@@ -72,12 +81,14 @@ int cgloadint(int value, int type) {
 
 // Load a value from a variable into a register.
 // Return the number of the register
-int cgloadglob(int id) {
+int cgloadglob(int id) 
+{
   // Get a new register
   int r = alloc_register();
 
   // Print out the code to initialise it
-  switch (Gsym[id].type) {
+  switch (Gsym[id].type) 
+  {
     case CHAR_P:
       fprintf(Outfile, "\tmovzbq\t%s(\%%rip), %s\n", Gsym[id].name,
 	      reglist[r]);
@@ -97,7 +108,8 @@ int cgloadglob(int id) {
 
 // Add two registers together and return
 // the number of the register with the result
-int cgadd(int r1, int r2) {
+int cgadd(int r1, int r2) 
+{
   fprintf(Outfile, "\taddq\t%s, %s\n", reglist[r1], reglist[r2]);
   free_register(r1);
   return (r2);
@@ -105,7 +117,8 @@ int cgadd(int r1, int r2) {
 
 // Subtract the second register from the first and
 // return the number of the register with the result
-int cgsub(int r1, int r2) {
+int cgsub(int r1, int r2) 
+{
   fprintf(Outfile, "\tsubq\t%s, %s\n", reglist[r2], reglist[r1]);
   free_register(r2);
   return (r1);
@@ -113,7 +126,8 @@ int cgsub(int r1, int r2) {
 
 // Multiply two registers together and return
 // the number of the register with the result
-int cgmul(int r1, int r2) {
+int cgmul(int r1, int r2) 
+{
   fprintf(Outfile, "\timulq\t%s, %s\n", reglist[r1], reglist[r2]);
   free_register(r1);
   return (r2);
@@ -121,7 +135,8 @@ int cgmul(int r1, int r2) {
 
 // Divide the first register by the second and
 // return the number of the register with the result
-int cgdiv(int r1, int r2) {
+int cgdiv(int r1, int r2) 
+{
   fprintf(Outfile, "\tmovq\t%s,%%rax\n", reglist[r1]);
   fprintf(Outfile, "\tcqo\n");
   fprintf(Outfile, "\tidivq\t%s\n", reglist[r2]);
@@ -131,7 +146,8 @@ int cgdiv(int r1, int r2) {
 }
 
 // Call printint() with the given register
-void cgprintint(int r) {
+void cgprintint(int r) 
+{
   fprintf(Outfile, "\tmovq\t%s, %%rdi\n", reglist[r]);
   fprintf(Outfile, "\tcall\tprintint\n");
   free_register(r);
@@ -139,7 +155,8 @@ void cgprintint(int r) {
 
 // Call a function with one argument from the given register
 // Return the register with the result
-int cgcall(int r, int id) {
+int cgcall(int r, int id) 
+{
   // Get a new register
   int outr = alloc_register();
   fprintf(Outfile, "\tmovq\t%s, %%rdi\n", reglist[r]);
@@ -150,8 +167,10 @@ int cgcall(int r, int id) {
 }
 
 // Store a register's value into a variable
-int cgstorglob(int r, int id) {
-  switch (Gsym[id].type) {
+int cgstorglob(int r, int id) 
+{
+  switch (Gsym[id].type) 
+  {
     case CHAR_P:
       fprintf(Outfile, "\tmovb\t%s, %s(\%%rip)\n", breglist[r],
 	      Gsym[id].name);
@@ -175,7 +194,8 @@ static int psize[] = { 0, 0, 1, 4, 8 };
 
 // Given a P_XXX type value, return the
 // size of a primitive type in bytes.
-int cgprimsize(int type) {
+int cgprimsize(int type) 
+{
   // Check the type is valid
   if (type < NONE_P || type > LONG_P)
     fatal("Bad type in cgprimsize()");
@@ -183,7 +203,8 @@ int cgprimsize(int type) {
 }
 
 // Generate a global symbol
-void cgglobsym(int id) {
+void cgglobsym(int id) 
+{
   int typesize;
   // Get the size of the type
   typesize = cgprimsize(Gsym[id].type);
@@ -197,7 +218,8 @@ static char *cmplist[] =
   { "sete", "setne", "setl", "setg", "setle", "setge" };
 
 // Compare two registers and set if true.
-int cgcompare_and_set(int ASTop, int r1, int r2) {
+int cgcompare_and_set(int ASTop, int r1, int r2) 
+{
 
   // Check the range of the AST operation
   if (ASTop < EQUAL_A || ASTop > GREATER_OR_EQUAL_A)
@@ -211,12 +233,14 @@ int cgcompare_and_set(int ASTop, int r1, int r2) {
 }
 
 // Generate a label
-void cglabel(int l) {
+void cglabel(int l) 
+{
   fprintf(Outfile, "L%d:\n", l);
 }
 
 // Generate a jump to a label
-void cgjump(int l) {
+void cgjump(int l) 
+{
   fprintf(Outfile, "\tjmp\tL%d\n", l);
 }
 
@@ -225,7 +249,8 @@ void cgjump(int l) {
 static char *invcmplist[] = { "jne", "je", "jge", "jle", "jg", "jl" };
 
 // Compare two registers and jump if false.
-int cgcompare_and_jump(int ASTop, int r1, int r2, int label) {
+int cgcompare_and_jump(int ASTop, int r1, int r2, int label) 
+{
 
   // Check the range of the AST operation
   if (ASTop < EQUAL_A || ASTop > GREATER_OR_EQUAL_A)
@@ -240,15 +265,18 @@ int cgcompare_and_jump(int ASTop, int r1, int r2, int label) {
 // Widen the value in the register from the old
 // to the new type, and return a register with
 // this new value
-int cgwiden(int r, int oldtype, int newtype) {
+int cgwiden(int r, int oldtype, int newtype) 
+{
   // Nothing to do
   return (r);
 }
 
 // Generate code to return a value from a function
-void cgreturn(int reg, int id) {
+void cgreturn(int reg, int id) 
+{
   // Generate code depending on the function's type
-  switch (Gsym[id].type) {
+  switch (Gsym[id].type) 
+  {
     case CHAR_P:
       fprintf(Outfile, "\tmovzbl\t%s, %%eax\n", breglist[reg]);
       break;

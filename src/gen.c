@@ -5,14 +5,16 @@
 // Generic code generator
 
 // Generate and return a new label number
-int genlabel(void) {
+int genlabel(void) 
+{
   static int id = 1;
   return (id++);
 }
 
 // Generate the code for an IF statement
 // and an optional ELSE clause
-static int genIF(AST_T *n) {
+static int genIF(AST_T *n) 
+{
   int Lfalse, Lend;
 
   // Generate two labels: one for the
@@ -45,7 +47,8 @@ static int genIF(AST_T *n) {
   // Optional ELSE clause: generate the
   // false compound statement and the
   // end label
-  if (n->right) {
+  if (n->right) 
+  {
     genAST(n->right, NOREG, n->op);
     genfreeregs();
     cglabel(Lend);
@@ -56,7 +59,8 @@ static int genIF(AST_T *n) {
 
 // Generate the code for a WHILE statement
 // and an optional ELSE clause
-static int genWHILE(AST_T *n) {
+static int genWHILE(AST_T *n) 
+{
   int Lstart, Lend;
 
   // Generate the start and end labels
@@ -86,11 +90,13 @@ static int genWHILE(AST_T *n) {
 // the previous rvalue, and the AST op of the parent,
 // generate assembly code recursively.
 // Return the register id with the tree's final value
-int genAST(AST_T *n, int reg, int parentASTop) {
+int genAST(AST_T *n, int reg, int parentASTop) 
+{
   int leftreg, rightreg;
 
   // We now have specific AST node handling at the top
-  switch (n->op) {
+  switch (n->op) 
+  {
     case IF_A:
       return (genIF(n));
     case WHILE_A:
@@ -119,7 +125,8 @@ int genAST(AST_T *n, int reg, int parentASTop) {
   if (n->right)
     rightreg = genAST(n->right, leftreg, n->op);
 
-  switch (n->op) {
+  switch (n->op) 
+  {
     case ADD_A:
       return (cgadd(leftreg, rightreg));
     case SUB_A:
@@ -169,18 +176,23 @@ int genAST(AST_T *n, int reg, int parentASTop) {
   }
 }
 
-void genpreamble() {
+void genpreamble() 
+{
   cgpreamble();
 }
-void genfreeregs() {
+void genfreeregs() 
+{
   freeall_registers();
 }
-void genprintint(int reg) {
+void genprintint(int reg) 
+{
   cgprintint(reg);
 }
-void genglobsym(int id) {
+void genglobsym(int id) 
+{
   cgglobsym(id);
 }
-int genprimsize(int type) {
+int genprimsize(int type) 
+{
   return (cgprimsize(type));
 }

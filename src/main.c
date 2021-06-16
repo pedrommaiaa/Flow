@@ -8,7 +8,8 @@
 // Compiler setup and top-level execution
 
 // Initialise global variables
-static void init() {
+static void init() 
+{
   Line = 1;
   Putback = '\n';
 }
@@ -17,7 +18,8 @@ static void init() {
 // Main program: check arguments and print a usage
 // if we don't have an argument. Open up the input
 // file and call scanfile() to scan the tokens in it.
-void main(int argc, char *argv[]) {
+void main(int argc, char *argv[]) 
+{
   AST_T *tree;
 
   if (argc < 2)
@@ -31,13 +33,15 @@ void main(int argc, char *argv[]) {
   init();
 
   // Open up the input file
-  if ((Infile = fopen(argv[1], "r")) == NULL) {
+  if ((Infile = fopen(argv[1], "r")) == NULL) 
+  {
     fprintf(stderr, "[ERROR] Unable to open %s: %s\n", argv[1], strerror(errno));
     exit(1);
   }
   
   // Create the output file
-  if ((Outfile = fopen("out.s", "w")) == NULL) {
+  if ((Outfile = fopen("out.s", "w")) == NULL) 
+  {
     fprintf(stderr, "[ERROR] Unable to create out.s: %s\n", strerror(errno));
     exit(1);
   }

@@ -7,7 +7,8 @@
 // Prototypes
 static AST_T *single_statement(void);
 
-static AST_T *print_statement(void) {
+static AST_T *print_statement(void) 
+{
   AST_T *tree;
   int lefttype, righttype;
   int reg;
@@ -39,7 +40,8 @@ static AST_T *print_statement(void) {
 }
 
 // Parse an assignment statement and return its AST
-static AST_T *assignment_statement(void) {
+static AST_T *assignment_statement(void) 
+{
   AST_T *left, *right, *tree;
   int lefttype, righttype;
   int id;
@@ -55,7 +57,8 @@ static AST_T *assignment_statement(void) {
   // Not a function call, on with an assignment then!
   // Check the identifier has been defined then make a leaf node for it
   // XXX Add structural type test
-  if ((id = findglob(Text)) == -1) {
+  if ((id = findglob(Text)) == -1) 
+  {
     fatals("Undeclared variable", Text);
   }
   right = mkastleaf(LVIDENT_A, Gsym[id].type, id);
@@ -85,7 +88,8 @@ static AST_T *assignment_statement(void) {
 
 // Parse an IF statement including any
 // optional ELSE clause and return its AST
-static AST_T *if_statement(void) {
+static AST_T *if_statement(void) 
+{
   AST_T *condAST, *trueAST, *falseAST = NULL;
 
   // Ensure we have 'if' '('
@@ -105,7 +109,8 @@ static AST_T *if_statement(void) {
 
   // If we have an 'else', skip it
   // and get the AST for the compound statement
-  if (Token.token == ELSE_T) {
+  if (Token.token == ELSE_T) 
+  {
     scan(&Token);
     falseAST = compound_statement();
   }
@@ -114,7 +119,8 @@ static AST_T *if_statement(void) {
 }
 
 // Parse a WHILE statement and return its AST
-static AST_T *while_statement(void) {
+static AST_T *while_statement(void) 
+{
   AST_T *condAST, *bodyAST;
 
   // Ensure we have 'while' '('
@@ -137,7 +143,8 @@ static AST_T *while_statement(void) {
 }
 
 // Parse a FOR statement and return its AST
-static AST_T *for_statement(void) {
+static AST_T *for_statement(void) 
+{
   AST_T *condAST, *bodyAST;
   AST_T *preopAST, *postopAST;
   AST_T *tree;
@@ -177,7 +184,8 @@ static AST_T *for_statement(void) {
 }
 
 // Parse a return statement and return its AST
-static AST_T *return_statement(void) {
+static AST_T *return_statement(void) 
+{
   AST_T *tree;
   int returntype, functype;
 
@@ -212,25 +220,19 @@ static AST_T *return_statement(void) {
 
 // Parse a single statement
 // and return its AST
-static AST_T *single_statement(void) {
-  switch (Token.token) {
-    case PRINT_T:
-      return (print_statement());
+static AST_T *single_statement(void) 
+{
+  switch (Token.token) 
+  {
+    case PRINT_T: return (print_statement());
     case CHAR_T:
     case INT_T:
-    case LONG_T:
-      var_declaration();
-      return (NULL);		// No AST generated here
-    case IDENT_T:
-      return (assignment_statement());
-    case IF_T:
-      return (if_statement());
-    case WHILE_T:
-      return (while_statement());
-    case FOR_T:
-      return (for_statement());
-    case RETURN_T:
-      return (return_statement());
+    case LONG_T: var_declaration(); return (NULL);		// No AST generated here
+    case IDENT_T: return (assignment_statement());
+    case IF_T: return (if_statement());
+    case WHILE_T: return (while_statement());
+    case FOR_T: return (for_statement());
+    case RETURN_T: return (return_statement());
     default:
       fatald("Syntax error, token", Token.token);
   }
@@ -238,7 +240,8 @@ static AST_T *single_statement(void) {
 
 // Parse a compound statement
 // and return its AST
-AST_T *compound_statement(void) {
+AST_T *compound_statement(void) 
+{
   AST_T *left = NULL;
   AST_T *tree;
 
@@ -251,21 +254,23 @@ AST_T *compound_statement(void) {
 
     // Some statements must be followed by a semicolon
     if (tree != NULL && (tree->op == PRINT_A || tree->op == ASSIGN_A ||
-			 tree->op == RETURN_A || tree->op == FUNCCALL_A))
+			                   tree->op == RETURN_A || tree->op == FUNCCALL_A))
       semi();
 
     // For each new tree, either save it in left
     // if left is empty, or glue the left and the
     // new tree together
-    if (tree != NULL) {
+    if (tree != NULL) 
+    {
       if (left == NULL)
-	left = tree;
+	      left = tree;
       else
-	left = mkastnode(GLUE_A, NONE_P, left, NULL, tree, 0);
+	      left = mkastnode(GLUE_A, NONE_P, left, NULL, tree, 0);
     }
     // When we hit a right curly bracket,
     // skip past it and return the AST
-    if (Token.token == RBRACE_T) {
+    if (Token.token == RBRACE_T) 
+    {
       rbrace();
       return (left);
     }

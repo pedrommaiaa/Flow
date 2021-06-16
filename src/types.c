@@ -11,7 +11,8 @@
 // zero or an WIDEN_A operation if one
 // has to be widened to match the other.
 // If onlyright is true, only widen left to right.
-int type_compatible(int *left, int *right, int onlyright) {
+int type_compatible(int *left, int *right, int onlyright) 
+{
   int leftsize, rightsize;
 
   // Same types, they are compatible
@@ -29,12 +30,14 @@ int type_compatible(int *left, int *right, int onlyright) {
     return (0);
 
   // Widen types as required
-  if (leftsize < rightsize) {
+  if (leftsize < rightsize) 
+  {
     *left = WIDEN_A;
     *right = 0;
     return (1);
   }
-  if (rightsize < leftsize) {
+  if (rightsize < leftsize) 
+  {
     if (onlyright)
       return (0);
     *left = 0;

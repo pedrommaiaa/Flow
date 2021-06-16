@@ -7,7 +7,8 @@
 
 // Parse the current token and
 // return a primitive type enum value
-int parse_type(int t) {
+int parse_type(int t) 
+{
   if (t == CHAR_T) return (CHAR_P);
   if (t == INT_T)  return (INT_P);
   if (t == LONG_T) return (LONG_P);
@@ -16,7 +17,8 @@ int parse_type(int t) {
 }
 
 // Parse the declaration of a variable
-void var_declaration(void) {
+void var_declaration(void) 
+{
   int id, type;
 
   // Get the type of the variable, then the identifier
@@ -33,7 +35,8 @@ void var_declaration(void) {
 }
 
 // Parse the declaration of a simplistic function
-struct ASTnode *function_declaration(void) {
+struct ASTnode *function_declaration(void) 
+{
   struct ASTnode *tree, *finalstmt;
   int nameslot, type, endlabel;
 
@@ -59,7 +62,8 @@ struct ASTnode *function_declaration(void) {
   // If the function type isn't P_VOID, check that
   // the last AST operation in the compound statement
   // was a return statement
-  if (type != VOID_P) {
+  if (type != VOID_P) 
+  {
     finalstmt = (tree->op == GLUE_A) ? tree->right : tree;
     if (finalstmt == NULL || finalstmt->op != RETURN_A)
       fatal("No return for function with non-void type");
