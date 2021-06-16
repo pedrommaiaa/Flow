@@ -3,16 +3,12 @@
 
 cd ../
 
-if [ ! -f ../flow ]
-then echo "Need to build ../flow first!"; exit 1
-fi
-
-for i in input*
-do if [ ! -f "out.$i" ]
+for i in input*flow
+do if [ ! -f "results/out.$i" ]
    then
      ../flow $i
      cc -o out out.s ../lib/printint.c
-     ./out > out.$i
+     ./out > results/out.$i
      rm -f out out.s
    fi
 done

@@ -3,10 +3,10 @@
 
 cd ../
 
-for i in input*
-do if [ "out.$i" ]
+for i in input*flow
+do if [ "results/out.$i" ]
    then
-     rm -f out.$i
+     rm -f results/out.$i
    fi
 done
 

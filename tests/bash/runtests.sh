@@ -9,17 +9,17 @@ then echo "Need to build ../flow first!"; exit 1
 fi
 
 for i in input*
-do if [ ! -f "out.$i" ]
+do if [ ! -f "results/out.$i" ]
    then echo "Can't run test on $i, no output file!"
    else
      echo -n $i
      ../flow $i
      cc -o out out.s ../lib/printint.c
      ./out > trial.$i
-     cmp -s "out.$i" "trial.$i"
+     cmp -s "results/out.$i" "trial.$i"
      if [ "$?" -eq "1" ]
      then echo ": failed"
-       diff -c "out.$i" "trial.$i"
+       diff -c "results/out.$i" "trial.$i"
        echo
      else echo ": OK"
      fi
