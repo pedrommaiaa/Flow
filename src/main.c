@@ -14,6 +14,11 @@ static void init()
   Putback = '\n';
 }
 
+// Print out a usage if started incorrectly
+static void usage(char *prog) {
+  fprintf(stderr, "Usage: %s infile\n", prog);
+  exit(1);
+}
 
 // Main program: check arguments and print a usage
 // if we don't have an argument. Open up the input
@@ -22,13 +27,8 @@ void main(int argc, char *argv[])
 {
   AST_T *tree;
 
-  if (argc < 2)
-  {
-    printf("---- * Interactive Flow Shell * ----\n");
-    
-    printf("---- * Interactive Shell Terminated. * ----\n");
-    exit(1);
-  }
+  if (argc != 2)
+    usage(argv[0]);
 
   init();
 
