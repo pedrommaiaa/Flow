@@ -49,21 +49,22 @@ typedef struct ASTnode {
     INTLIT_A,
     IDENT_A, LVIDENT_A, ASSIGN_A, PRINT_A, GLUE_A,
     IF_A, WHILE_A, FUNCTION_A, WIDEN_A, RETURN_A,
-    FUNCCALL_A, DEREF_A, ADDR_A
-  }op;			              // "Operation" to be performed on this tree
-  int type;			          // Type of any expression this tree generates
-  struct ASTnode *left;		// Left, middle and right child trees
+    FUNCCALL_A, DEREF_A, ADDR_A, SCALE_A
+  }op;			                // "Operation" to be performed on this tree
+  int type;			            // Type of any expression this tree generates
+  struct ASTnode *left;		  // Left, middle and right child trees
   struct ASTnode *mid;
   struct ASTnode *right;
-  union {			            // For INTLIT, the integer value
-    int intvalue;		      // For IDENT, the symbol slot number
-    int id;			          // For FUNCTION, the symbol slot number
-  } v;				            // For FUNCCALL, the symbol slot number
+  union {			              // For INTLIT_A, the integer value
+    int intvalue;		        // For IDENT_A, the symbol slot number
+    int id;			            // For FUNCTION_A, the symbol slot number
+    int size;               // For SCALE_A, the size to scale bt
+  } v;				              // For FUNCCALL_A, the symbol slot number
 } AST_T;
 
 
-#define NOREG	-1		// Use NOREG when the AST generation
-				            // functions have no register to return
+#define NOREG	-1		        // Use NOREG when the AST generation
+				                    // functions have no register to return
 
 // Symbol table structure
 typedef struct symtable {

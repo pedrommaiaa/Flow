@@ -10,7 +10,6 @@ static AST_T *single_statement(void);
 static AST_T *print_statement(void) 
 {
   AST_T *tree;
-  int lefttype, righttype;
 
   // Match a 'print' as the first token
   // And ensure '('
@@ -21,14 +20,9 @@ static AST_T *print_statement(void)
   tree = binexpr(0);
 
   // Ensure the two types are compatible.
-  lefttype = INT_P;
-  righttype = tree->type;
-  if (!type_compatible(&lefttype, &righttype, 0))
-    fatal("Incompatible types");
-
-  // Widen the tree if required. 
-  if (righttype)
-    tree = mkastunary(righttype, INT_P, tree, 0);
+  tree = modify_type(tree, INT_P, 0);
+  if (tree == NULL)
+    fatal("Incompatible type to print");
 
   // Make an print AST tree
   tree = mkastunary(PRINT_A, NONE_P, tree, 0);
@@ -42,7 +36,6 @@ static AST_T *print_statement(void)
 static AST_T *assignment_statement(void) 
 {
   AST_T *left, *right, *tree;
-  int lefttype, righttype;
   int id;
 
   // Ensure we have an identifier
@@ -69,14 +62,9 @@ static AST_T *assignment_statement(void)
   left = binexpr(0);
 
   // Ensure the two types are compatible.
-  lefttype = left->type;
-  righttype = right->type;
-  if (!type_compatible(&lefttype, &righttype, 1))
-    fatal("Incompatible types");
-
-  // Widen the left if required.
-  if (lefttype)
-    left = mkastunary(lefttype, right->type, left, 0);
+  left = modify_type(left, right->type, 0);
+  if (left == NULL)
+    fatal("Incompatible expression in assignment");
 
   // Make an assignment AST tree
   tree = mkastnode(ASSIGN_A, INT_P, left, NULL, right, 0);
@@ -186,7 +174,6 @@ static AST_T *for_statement(void)
 static AST_T *return_statement(void) 
 {
   AST_T *tree;
-  int returntype, functype;
 
   // Can't return a value if function returns VOID_P
   if (Gsym[Functionid].type == VOID_P)
@@ -200,14 +187,9 @@ static AST_T *return_statement(void)
   tree = binexpr(0);
 
   // Ensure this is compatible with the function's type
-  returntype = tree->type;
-  functype = Gsym[Functionid].type;
-  if (!type_compatible(&returntype, &functype, 1))
-    fatal("Incompatible types");
-
-  // Widen the left if required.
-  if (returntype)
-    tree = mkastunary(returntype, functype, tree, 0);
+  tree = modify_type(tree, Gsym[Functionid].type, 0);
+  if (tree == NULL)
+    fatal("Incompatible type to print");
 
   // Add on the RETURN_A node
   tree = mkastunary(RETURN_A, NONE_P, tree, 0);

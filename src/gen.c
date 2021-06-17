@@ -152,6 +152,20 @@ int genAST(AST_T *n, int reg, int parentASTop)
     case FUNCCALL_A: return (cgcall(leftreg, n->v.id));
     case ADDR_A: return (cgaddress(n->v.id));
     case DEREF_A: return (cgderef(leftreg, n->left->type));
+    case SCALE_A:
+      // Small optimisation: use shift if the
+      // scale value is a known power of two
+      switch (n->v.size)
+      {
+        case 2: return(cgshlconst(leftreg, 1));
+        case 4: return(cgshlconst(leftreg, 2));
+        case 8: return(cgshlconst(leftreg, 3));
+        default:
+          // Load a register with the size and
+          // multiply the leftreg by this size
+          rightreg = cgloadint(n->v.size, INT_P);
+          return (cgmul(leftreg, rightreg));
+      }
     default:
       fatald("Unknown AST operator", n->op);
   }
