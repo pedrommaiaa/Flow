@@ -4,90 +4,25 @@
 
 // Parsing of statements
 
+
 // Prototypes
 static AST_T *single_statement(void);
 
-static AST_T *print_statement(void) 
-{
-  AST_T *tree;
-
-  // Match a 'print' as the first token
-  // And ensure '('
-  match(PRINT_T, "print");
-  lparen();
-
-  // Parse the following expression
-  tree = binexpr(0);
-
-  // Ensure the two types are compatible.
-  tree = modify_type(tree, INT_P, 0);
-  if (tree == NULL)
-    fatal("Incompatible type to print");
-
-  // Make an print AST tree
-  tree = mkastunary(PRINT_A, NONE_P, tree, 0);
-
-  // Ensure ')' and return the AST
-  rparen();
-  return (tree);
-}
-
-// Parse an assignment statement and return its AST
-static AST_T *assignment_statement(void) 
-{
-  AST_T *left, *right, *tree;
-  int id;
-
-  // Ensure we have an identifier
-  ident();
-
-  // This could be a variable or a function call.
-  // If next token is '(', it's a function call
-  if (Token.token == LPAREN_T)
-    return (funccall());
-
-  // Not a function call, on with an assignment then!
-  // Check the identifier has been defined then make a leaf node for it
-  // XXX Add structural type test
-  if ((id = findglob(Text)) == -1) 
-  {
-    fatals("Undeclared variable", Text);
-  }
-  right = mkastleaf(LVIDENT_A, Gsym[id].type, id);
-
-  // Ensure we have an equals sign
-  match(ASSIGN_T, "=");
-
-  // Parse the following expression
-  left = binexpr(0);
-
-  // Ensure the two types are compatible.
-  left = modify_type(left, right->type, 0);
-  if (left == NULL)
-    fatal("Incompatible expression in assignment");
-
-  // Make an assignment AST tree
-  tree = mkastnode(ASSIGN_A, INT_P, left, NULL, right, 0);
-
-  // Return the AST
-  return (tree);
-}
 
 // Parse an IF statement including any
 // optional ELSE clause and return its AST
-static AST_T *if_statement(void) 
-{
+static AST_T *if_statement(void) {
   AST_T *condAST, *trueAST, *falseAST = NULL;
 
   // Ensure we have 'if' '('
-  match(IF_T, "if");
+  match(T_IF, "if");
   lparen();
 
   // Parse the following expression
   // and the ')' following. Ensure
   // the tree's operation is a comparison.
   condAST = binexpr(0);
-  if (condAST->op < EQUAL_A || condAST->op > GREATER_OR_EQUAL_A)
+  if (condAST->op < A_EQ || condAST->op > A_GE)
     fatal("Bad comparison operator");
   rparen();
 
@@ -96,29 +31,28 @@ static AST_T *if_statement(void)
 
   // If we have an 'else', skip it
   // and get the AST for the compound statement
-  if (Token.token == ELSE_T) 
-  {
+  if (Token.token == T_ELSE) {
     scan(&Token);
     falseAST = compound_statement();
   }
   // Build and return the AST for this statement
-  return (mkastnode(IF_A, NONE_P, condAST, trueAST, falseAST, 0));
+  return (mkastnode(A_IF, P_NONE, condAST, trueAST, falseAST, 0));
 }
 
+
 // Parse a WHILE statement and return its AST
-static AST_T *while_statement(void) 
-{
+static AST_T *while_statement(void) {
   AST_T *condAST, *bodyAST;
 
   // Ensure we have 'while' '('
-  match(WHILE_T, "while");
+  match(T_WHILE, "while");
   lparen();
 
   // Parse the following expression
   // and the ')' following. Ensure
   // the tree's operation is a comparison.
   condAST = binexpr(0);
-  if (condAST->op < EQUAL_A || condAST->op > GREATER_OR_EQUAL_A)
+  if (condAST->op < A_EQ || condAST->op > A_GE)
     fatal("Bad comparison operator");
   rparen();
 
@@ -126,18 +60,18 @@ static AST_T *while_statement(void)
   bodyAST = compound_statement();
 
   // Build and return the AST for this statement
-  return (mkastnode(WHILE_A, NONE_P, condAST, NULL, bodyAST, 0));
+  return (mkastnode(A_WHILE, P_NONE, condAST, NULL, bodyAST, 0));
 }
 
+
 // Parse a FOR statement and return its AST
-static AST_T *for_statement(void) 
-{
+static AST_T *for_statement(void) {
   AST_T *condAST, *bodyAST;
   AST_T *preopAST, *postopAST;
   AST_T *tree;
 
   // Ensure we have 'for' '('
-  match(FOR_T, "for");
+  match(T_FOR, "for");
   lparen();
 
   // Get the pre_op statement and the ';'
@@ -146,7 +80,7 @@ static AST_T *for_statement(void)
 
   // Get the condition and the ';'
   condAST = binexpr(0);
-  if (condAST->op < EQUAL_A || condAST->op > GREATER_OR_EQUAL_A)
+  if (condAST->op < A_EQ || condAST->op > A_GE)
     fatal("Bad comparison operator");
   semi();
 
@@ -161,26 +95,26 @@ static AST_T *for_statement(void)
   // Later on, we'll change the semantics for when some are missing
 
   // Glue the compound statement and the postop tree
-  tree = mkastnode(GLUE_A, NONE_P, bodyAST, NULL, postopAST, 0);
+  tree = mkastnode(A_GLUE, P_NONE, bodyAST, NULL, postopAST, 0);
 
   // Make a WHILE loop with the condition and this new body
-  tree = mkastnode(WHILE_A, NONE_P, condAST, NULL, tree, 0);
+  tree = mkastnode(A_WHILE, P_NONE, condAST, NULL, tree, 0);
 
   // And glue the preop tree to the A_WHILE tree
-  return (mkastnode(GLUE_A, NONE_P, preopAST, NULL, tree, 0));
+  return (mkastnode(A_GLUE, P_NONE, preopAST, NULL, tree, 0));
 }
 
+
 // Parse a return statement and return its AST
-static AST_T *return_statement(void) 
-{
+static AST_T *return_statement(void) {
   AST_T *tree;
 
-  // Can't return a value if function returns VOID_P
-  if (Gsym[Functionid].type == VOID_P)
+  // Can't return a value if function returns P_VOID
+  if (Gsym[Functionid].type == P_VOID)
     fatal("Can't return from a void function");
 
   // Ensure we have 'return' '('
-  match(RETURN_T, "return");
+  match(T_RETURN, "return");
   lparen();
 
   // Parse the following expression
@@ -189,47 +123,48 @@ static AST_T *return_statement(void)
   // Ensure this is compatible with the function's type
   tree = modify_type(tree, Gsym[Functionid].type, 0);
   if (tree == NULL)
-    fatal("Incompatible type to print");
+    fatal("Incompatible type to return");
 
-  // Add on the RETURN_A node
-  tree = mkastunary(RETURN_A, NONE_P, tree, 0);
+  // Add on the A_RETURN node
+  tree = mkastunary(A_RETURN, P_NONE, tree, 0);
 
   // Get the ')'
   rparen();
   return (tree);
 }
 
-// Parse a single statement
-// and return its AST
-static AST_T *single_statement(void) 
-{
+// Parse a single statement and return its AST
+static AST_T *single_statement(void) {
   int type;
 
-  switch (Token.token) 
-  {
-    case PRINT_T: return (print_statement());
-    case CHAR_T:
-    case INT_T: 
-    case LONG_T: 
-      type = parse_type(); 
-      ident(); 
-      var_declaration(type); 
+  switch (Token.token) {
+    case T_CHAR:
+    case T_INT:
+    case T_LONG:
+
+      // The beginning of a variable declaration.
+      // Parse the type and get the identifier.
+      // Then parse the rest of the declaration.
+      // XXX: These are globals at present.
+      type = parse_type();
+      ident();
+      var_declaration(type);
       return (NULL);		// No AST generated here
-    case IDENT_T: return (assignment_statement());
-    case IF_T: return (if_statement());
-    case WHILE_T: return (while_statement());
-    case FOR_T: return (for_statement());
-    case RETURN_T: return (return_statement());
+    case T_IF: return (if_statement());
+    case T_WHILE: return (while_statement());
+    case T_FOR: return (for_statement());
+    case T_RETURN: return (return_statement());
     default:
-      fatald("Syntax error, token", Token.token);
+      // For now, see if this is an expression.
+      // This catches assignment statements.
+      return (binexpr(0));
   }
-  return (NULL); // Keep -Wall happy
+  return (NULL);		// Keep -Wall happy
 }
 
 // Parse a compound statement
 // and return its AST
-AST_T *compound_statement(void) 
-{
+AST_T *compound_statement(void) {
   AST_T *left = NULL;
   AST_T *tree;
 
@@ -241,24 +176,23 @@ AST_T *compound_statement(void)
     tree = single_statement();
 
     // Some statements must be followed by a semicolon
-    if (tree != NULL && (tree->op == PRINT_A || tree->op == ASSIGN_A ||
-			                   tree->op == RETURN_A || tree->op == FUNCCALL_A))
+    if (tree != NULL && (tree->op == A_ASSIGN ||
+			 tree->op == A_RETURN || tree->op == A_FUNCCALL))
       semi();
 
     // For each new tree, either save it in left
     // if left is empty, or glue the left and the
     // new tree together
-    if (tree != NULL) 
-    {
+    if (tree != NULL) {
       if (left == NULL)
-	      left = tree;
+	left = tree;
       else
-	      left = mkastnode(GLUE_A, NONE_P, left, NULL, tree, 0);
+	left = mkastnode(A_GLUE, P_NONE, left, NULL, tree, 0);
     }
+
     // When we hit a right curly bracket,
     // skip past it and return the AST
-    if (Token.token == RBRACE_T) 
-    {
+    if (Token.token == T_RBRACE) {
       rbrace();
       return (left);
     }

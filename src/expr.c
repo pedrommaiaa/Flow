@@ -4,17 +4,16 @@
 
 // Parsing of expressions
 
+
 // Parse a function call with a single expression
 // argument and return its AST
-AST_T *funccall(void) 
-{
+AST_T *funccall(void) {
   AST_T *tree;
   int id;
 
   // Check that the identifier has been defined,
   // then make a leaf node for it. XXX Add structural type test
-  if ((id = findglob(Text)) == -1) 
-  {
+  if ((id = findglob(Text)) == -1) {
     fatals("Undeclared function", Text);
   }
   // Get the '('
@@ -26,7 +25,7 @@ AST_T *funccall(void)
   // Build the function call AST node. Store the
   // function's return type as this node's type.
   // Also record the function's symbol-id
-  tree = mkastunary(FUNCCALL_A, Gsym[id].type, tree, id);
+  tree = mkastunary(A_FUNCCALL, Gsym[id].type, tree, id);
 
   // Get the ')'
   rparen();
@@ -35,29 +34,27 @@ AST_T *funccall(void)
 
 // Parse a primary factor and return an
 // AST node representing it.
-static AST_T *primary(void) 
-{
+static AST_T *primary(void) {
   AST_T *n;
   int id;
 
-  switch (Token.token) 
-  {
-    case INTLIT_T:
+  switch (Token.token) {
+    case T_INTLIT:
       // For an INTLIT token, make a leaf AST node for it.
-      // Make it a CHAR_P if it's within the CHAR_P range
+      // Make it a P_CHAR if it's within the P_CHAR range
       if ((Token.intvalue) >= 0 && (Token.intvalue < 256))
-	      n = mkastleaf(INTLIT_A, CHAR_P, Token.intvalue);
+	      n = mkastleaf(A_INTLIT, P_CHAR, Token.intvalue);
       else
-	      n = mkastleaf(INTLIT_A, INT_P, Token.intvalue);
+	      n = mkastleaf(A_INTLIT, P_INT, Token.intvalue);
       break;
 
-    case IDENT_T:
+    case T_IDENT:
       // This could be a variable or a function call.
       // Scan in the next token to find out
       scan(&Token);
 
       // It's a '(', so a function call
-      if (Token.token == LPAREN_T)
+      if (Token.token == T_LPAREN)
 	      return (funccall());
 
       // Not a function call, so reject the new token
@@ -69,7 +66,7 @@ static AST_T *primary(void)
 	      fatals("Unknown variable", Text);
 
       // Make a leaf AST node for it
-      n = mkastleaf(IDENT_A, Gsym[id].type, id);
+      n = mkastleaf(A_IDENT, Gsym[id].type, id);
       break;
 
     default:
@@ -82,86 +79,86 @@ static AST_T *primary(void)
 }
 
 
-// Convert a binary operator token into an AST operation.
+// Convert a binary operator token into a binary AST operation.
 // We rely on a 1:1 mapping from token to AST operation
-static int arithop(int tokentype) 
-{
-  if (tokentype > EOF_T && tokentype < INTLIT_T)
+static int binastop(int tokentype) {
+  if (tokentype > T_EOF && tokentype < T_INTLIT)
     return (tokentype);
   fatald("Syntax error, token", tokentype);
-  return (0); // Keep -Wall happy
+  return (0);			// Keep -Wall happy
+}
+
+// Return true if a token is right-associative,
+// false otherwise.
+static int rightassoc(int tokentype) {
+  if (tokentype == T_ASSIGN)
+    return(1);
+  return(0);
 }
 
 // Operator precedence for each token. Must
 // match up with the order of tokens in defs.h
-static int OpPrec[] = 
-{
-  0, 10, 10,			  // EOF_T, PLUS_T, MINUS_T
-  20, 20,			      // STAR_T, SLASH_T
-  30, 30,			      // EQUAL_T, NOT_EQUAL_T
-  40, 40, 40, 40		// LESS_THAN_T, GREATER_THAN_T, LESS_OR_EQUAL_T, GREATER_OR_EQUAL_T
+static int OpPrec[] = {
+   0, 10,			// T_EOF,  T_ASSIGN
+  20, 20,			// T_PLUS, T_MINUS
+  30, 30,			// T_STAR, T_SLASH
+  40, 40,			// T_EQ, T_NE
+  50, 50, 50, 50		// T_LT, T_GT, T_LE, T_GE
 };
 
 // Check that we have a binary operator and
 // return its precedence.
-static int op_precedence(int tokentype) 
-{
+static int op_precedence(int tokentype) {
   int prec = OpPrec[tokentype];
   if (prec == 0)
     fatald("Syntax error, token", tokentype);
   return (prec);
 }
 
-
-// Parse a prefix expression and return
+// Parse a prefix expression and return 
 // a sub-tree representing it.
-AST_T *prefix(void)
-{
+AST_T *prefix(void) {
   AST_T *tree;
-  switch (Token.token)
-  {
-    case AMPER_T:
+  switch (Token.token) {
+    case T_AMPER:
       // Get the next token and parse it
       // recursively as a prefix expression
       scan(&Token);
       tree = prefix();
 
       // Ensure that it's an identifier
-      if (tree->op != IDENT_A)
-        fatal("& operator must be followed by an identifier");
+      if (tree->op != A_IDENT)
+	      fatal("& operator must be followed by an identifier");
 
-      // Now change the operator to ADDR_A and the type 
-      // to a pointer to the original type
-      tree->op = ADDR_A; 
+      // Now change the operator to A_ADDR and the type to
+      // a pointer to the original type
+      tree->op = A_ADDR;
       tree->type = pointer_to(tree->type);
       break;
     
-    case STAR_T:
+    case T_STAR:
       // Get the next token and parse it
       // recursively as a prefix expression
       scan(&Token);
       tree = prefix();
 
-      // For now, ensure it's either another deref or
-      // an identifier
-      if (tree->op != IDENT_A && tree->op != DEREF_A)
-        fatal("* operator must be followed by an identifier or *");
+      // For now, ensure it's either another deref or an
+      // identifier
+      if (tree->op != A_IDENT && tree->op != A_DEREF)
+	      fatal("* operator must be followed by an identifier or *");
 
-      // Prepend an DEREF_A operation to the tree
-      tree = mkastunary(DEREF_A, value_at(tree->type), tree, 0);
+      // Prepend an A_DEREF operation to the tree
+      tree = mkastunary(A_DEREF, value_at(tree->type), tree, 0);
       break;
-    
-    default: tree = primary();
+    default:
+      tree = primary();
   }
   return (tree);
 }
 
-
-
 // Return an AST tree whose root is a binary operator.
 // Parameter ptp is the previous token's precedence.
-AST_T *binexpr(int ptp) 
-{
+AST_T *binexpr(int ptp) {
   AST_T *left, *right;
   AST_T *ltemp, *rtemp;
   int ASTop;
@@ -173,13 +170,15 @@ AST_T *binexpr(int ptp)
 
   // If we hit a semicolon or ')', return just the left node
   tokentype = Token.token;
-  if (tokentype == SEMI_T || tokentype == RPAREN_T)
-    return (left);
+  if (tokentype == T_SEMI || tokentype == T_RPAREN) {
+      left->rvalue= 1; return(left);
+  }
 
-  // While the precedence of this token is
-  // more than that of the previous token precedence
-  while (op_precedence(tokentype) > ptp) 
-  {
+  // While the precedence of this token is more than that of the
+  // previous token precedence, or it's right associative and
+  // equal to the previous token's precedence
+  while ((op_precedence(tokentype) > ptp) ||
+         (rightassoc(tokentype) && op_precedence(tokentype) == ptp)) {
     // Fetch in the next integer literal
     scan(&Token);
 
@@ -187,30 +186,55 @@ AST_T *binexpr(int ptp)
     // precedence of our token to build a sub-tree
     right = binexpr(OpPrec[tokentype]);
 
-    // Ensure the two types are compatible by trying
-    // to modify each tree to match the other's type.
-    ASTop = arithop(tokentype);
-    ltemp = modify_type(left, right->type, ASTop);
-    rtemp = modify_type(right, left->type, ASTop);
-    if (ltemp == NULL && rtemp == NULL)
-      fatal("Incompatible types in binary expression");
-    if (ltemp != NULL)
-      left = ltemp;
-    if (rtemp != NULL)
-      right = rtemp;
+    // Determine the operation to be performed on the sub-trees
+    ASTop = binastop(tokentype);
+
+    if (ASTop == A_ASSIGN) {
+      // Assignment
+      // Make the right tree into an rvalue
+      right->rvalue= 1;
+
+      // Ensure the right's type matches the left
+      right = modify_type(right, left->type, 0);
+      if (left == NULL)
+        fatal("Incompatible expression in assignment");
+
+      // Make an assignment AST tree. However, switch
+      // left and right around, so that the right expression's 
+      // code will be generated before the left expression
+      ltemp= left; left= right; right= ltemp;
+    } else {
+
+      // We are not doing an assignment, so both trees should be rvalues
+      // Convert both trees into rvalue if they are lvalue trees
+      left->rvalue= 1;
+      right->rvalue= 1;
+
+      // Ensure the two types are compatible by trying
+      // to modify each tree to match the other's type.
+      ltemp = modify_type(left, right->type, ASTop);
+      rtemp = modify_type(right, left->type, ASTop);
+      if (ltemp == NULL && rtemp == NULL)
+        fatal("Incompatible types in binary expression");
+      if (ltemp != NULL)
+        left = ltemp;
+      if (rtemp != NULL)
+        right = rtemp;
+    }
 
     // Join that sub-tree with ours. Convert the token
     // into an AST operation at the same time.
-    left = mkastnode(arithop(tokentype), left->type, left, NULL, right, 0);
+    left = mkastnode(binastop(tokentype), left->type, left, NULL, right, 0);
 
     // Update the details of the current token.
     // If we hit a semicolon or ')', return just the left node
     tokentype = Token.token;
-    if (tokentype == SEMI_T || tokentype == RPAREN_T)
-      return (left);
+    if (tokentype == T_SEMI || tokentype == T_RPAREN) {
+      left->rvalue= 1; return(left);
+    }
   }
 
   // Return the tree we have when the precedence
   // is the same or lower
-  return (left);
+  left->rvalue= 1; return(left);
 }

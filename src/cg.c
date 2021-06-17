@@ -4,6 +4,7 @@
 
 // Code generator for x86-64
 
+
 // List of available registers and their names.
 // We need a list of byte and doubleword registers, too
 static int freereg[4];
@@ -83,18 +84,18 @@ int cgloadglob(int id) {
 
   // Print out the code to initialise it
   switch (Gsym[id].type) {
-    case CHAR_P:
+    case P_CHAR:
       fprintf(Outfile, "\tmovzbq\t%s(%%rip), %s\n", Gsym[id].name,
 	      reglist[r]);
       break;
-    case INT_P:
+    case P_INT:
       fprintf(Outfile, "\tmovzbl\t%s(\%%rip), %s\n", Gsym[id].name,
 	      reglist[r]);
       break;
-    case LONG_P:
-    case CHARPTR_P:
-    case INTPTR_P:
-    case LONGPTR_P:
+    case P_LONG:
+    case P_CHARPTR:
+    case P_INTPTR:
+    case P_LONGPTR:
       fprintf(Outfile, "\tmovq\t%s(\%%rip), %s\n", Gsym[id].name, reglist[r]);
       break;
     default:
@@ -166,18 +167,18 @@ int cgshlconst(int r, int val) {
 // Store a register's value into a variable
 int cgstorglob(int r, int id) {
   switch (Gsym[id].type) {
-    case CHAR_P:
+    case P_CHAR:
       fprintf(Outfile, "\tmovb\t%s, %s(\%%rip)\n", breglist[r],
 	      Gsym[id].name);
       break;
-    case INT_P:
+    case P_INT:
       fprintf(Outfile, "\tmovl\t%s, %s(\%%rip)\n", dreglist[r],
 	      Gsym[id].name);
       break;
-    case LONG_P:
-    case CHARPTR_P:
-    case INTPTR_P:
-    case LONGPTR_P:
+    case P_LONG:
+    case P_CHARPTR:
+    case P_INTPTR:
+    case P_LONGPTR:
       fprintf(Outfile, "\tmovq\t%s, %s(\%%rip)\n", reglist[r], Gsym[id].name);
       break;
     default:
@@ -194,7 +195,7 @@ static int psize[] = { 0, 0, 1, 4, 8, 8, 8, 8, 8 };
 // size of a primitive type in bytes.
 int cgprimsize(int type) {
   // Check the type is valid
-  if (type < NONE_P || type > LONGPTR_P)
+  if (type < P_NONE || type > P_LONGPTR)
     fatal("Bad type in cgprimsize()");
   return (psize[type]);
 }
@@ -215,7 +216,7 @@ void cgglobsym(int id) {
 }
 
 // List of comparison instructions,
-// in AST order: EQUAL_A, A_NE, A_LT, A_GT, A_LE, GREATER_OR_EQUAL_A
+// in AST order: A_EQ, A_NE, A_LT, A_GT, A_LE, A_GE
 static char *cmplist[] =
   { "sete", "setne", "setl", "setg", "setle", "setge" };
 
@@ -223,11 +224,11 @@ static char *cmplist[] =
 int cgcompare_and_set(int ASTop, int r1, int r2) {
 
   // Check the range of the AST operation
-  if (ASTop < EQUAL_A || ASTop > GREATER_OR_EQUAL_A)
+  if (ASTop < A_EQ || ASTop > A_GE)
     fatal("Bad ASTop in cgcompare_and_set()");
 
   fprintf(Outfile, "\tcmpq\t%s, %s\n", reglist[r2], reglist[r1]);
-  fprintf(Outfile, "\t%s\t%s\n", cmplist[ASTop - EQUAL_A], breglist[r2]);
+  fprintf(Outfile, "\t%s\t%s\n", cmplist[ASTop - A_EQ], breglist[r2]);
   fprintf(Outfile, "\tmovzbq\t%s, %s\n", breglist[r2], reglist[r2]);
   free_register(r1);
   return (r2);
@@ -244,18 +245,18 @@ void cgjump(int l) {
 }
 
 // List of inverted jump instructions,
-// in AST order: EQUAL_A, A_NE, A_LT, A_GT, A_LE, GREATER_OR_EQUAL_A
+// in AST order: A_EQ, A_NE, A_LT, A_GT, A_LE, A_GE
 static char *invcmplist[] = { "jne", "je", "jge", "jle", "jg", "jl" };
 
 // Compare two registers and jump if false.
 int cgcompare_and_jump(int ASTop, int r1, int r2, int label) {
 
   // Check the range of the AST operation
-  if (ASTop < EQUAL_A || ASTop > GREATER_OR_EQUAL_A)
+  if (ASTop < A_EQ || ASTop > A_GE)
     fatal("Bad ASTop in cgcompare_and_set()");
 
   fprintf(Outfile, "\tcmpq\t%s, %s\n", reglist[r2], reglist[r1]);
-  fprintf(Outfile, "\t%s\tL%d\n", invcmplist[ASTop - EQUAL_A], label);
+  fprintf(Outfile, "\t%s\tL%d\n", invcmplist[ASTop - A_EQ], label);
   freeall_registers();
   return (NOREG);
 }
@@ -272,13 +273,13 @@ int cgwiden(int r, int oldtype, int newtype) {
 void cgreturn(int reg, int id) {
   // Generate code depending on the function's type
   switch (Gsym[id].type) {
-    case CHAR_P:
+    case P_CHAR:
       fprintf(Outfile, "\tmovzbl\t%s, %%eax\n", breglist[reg]);
       break;
-    case INT_P:
+    case P_INT:
       fprintf(Outfile, "\tmovl\t%s, %%eax\n", dreglist[reg]);
       break;
-    case LONG_P:
+    case P_LONG:
       fprintf(Outfile, "\tmovq\t%s, %%rax\n", reglist[reg]);
       break;
     default:
@@ -301,15 +302,35 @@ int cgaddress(int id) {
 // pointing at into the same register
 int cgderef(int r, int type) {
   switch (type) {
-    case CHARPTR_P:
+    case P_CHARPTR:
       fprintf(Outfile, "\tmovzbq\t(%s), %s\n", reglist[r], reglist[r]);
       break;
-    case INTPTR_P:
+    case P_INTPTR:
       fprintf(Outfile, "\tmovq\t(%s), %s\n", reglist[r], reglist[r]);
       break;
-    case LONGPTR_P:
+    case P_LONGPTR:
       fprintf(Outfile, "\tmovq\t(%s), %s\n", reglist[r], reglist[r]);
       break;
+    default:
+      fatald("Can't cgderef on type:", type);
   }
   return (r);
+}
+
+// Store through a dereferenced pointer
+int cgstorderef(int r1, int r2, int type) {
+  switch (type) {
+    case P_CHAR:
+      fprintf(Outfile, "\tmovb\t%s, (%s)\n", breglist[r1], reglist[r2]);
+      break;
+    case P_INT:
+      fprintf(Outfile, "\tmovq\t%s, (%s)\n", reglist[r1], reglist[r2]);
+      break;
+    case P_LONG:
+      fprintf(Outfile, "\tmovq\t%s, (%s)\n", reglist[r1], reglist[r2]);
+      break;
+    default:
+      fatald("Can't cgstoderef on type:", type);
+  }
+  return (r1);
 }

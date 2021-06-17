@@ -1,39 +1,24 @@
 	.text
 	.data
-	.globl	c
-c:	.long	0
+	.globl	a
+a:	.long	0
 	.data
-	.globl	d
-d:	.long	0
-	.data
-	.globl	e
-e:	.quad	0
-	.data
-	.globl	f
-f:	.long	0
+	.globl	b
+b:	.long	0
 	.text
 	.globl	main
 	.type	main, @function
 main:
 	pushq	%rbp
 	movq	%rsp, %rbp
-	movq	$12, %r8
-	movl	%r8d, c(%rip)
-	movq	$18, %r8
-	movl	%r8d, d(%rip)
-	movzbl	c(%rip), %r8
+	movq	$34, %r8
+	movl	%r8d, b(%rip)
+	movl	%r8d, a(%rip)
+	movzbl	a(%rip), %r8
 	movq	%r8, %rdi
 	call	printint
 	movq	%rax, %r9
-	leaq	c(%rip), %r8
-	movq	$1, %r9
-	salq	$2, %r9
-	addq	%r8, %r9
-	movq	%r9, e(%rip)
-	movq	e(%rip), %r8
-	movq	(%r8), %r8
-	movl	%r8d, f(%rip)
-	movzbl	f(%rip), %r8
+	movzbl	b(%rip), %r8
 	movq	%r8, %rdi
 	call	printint
 	movq	%rax, %r9

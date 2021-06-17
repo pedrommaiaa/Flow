@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "data.h": "c",
+        "decl.h": "c",
+        "defs.h": "c",
+        "errno.h": "c"
+    }
+}

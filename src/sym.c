@@ -7,8 +7,7 @@
 
 // Determine if the symbol s is in the global symbol table.
 // Return its slot position or -1 if not found.
-int findglob(char *s) 
-{
+int findglob(char *s) {
   int i;
 
   for (i = 0; i < Globs; i++) {
@@ -20,8 +19,7 @@ int findglob(char *s)
 
 // Get the position of a new global symbol slot, or die
 // if we've run out of positions.
-static int newglob(void) 
-{
+static int newglob(void) {
   int p;
 
   if ((p = Globs++) >= NSYMBOLS)
@@ -32,8 +30,7 @@ static int newglob(void)
 // Add a global symbol to the symbol table.
 // Also set up its type and structural type.
 // Return the slot number in the symbol table
-int addglob(char *name, int type, int stype, int endlabel) 
-{
+int addglob(char *name, int type, int stype, int endlabel) {
   int y;
 
   // If this is already in the symbol table, return the existing slot

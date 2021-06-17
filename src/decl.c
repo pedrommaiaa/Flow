@@ -2,29 +2,36 @@
 #include "include/data.h"
 #include "include/decl.h"
 
-
 // Parsing of declarations
 
-// Parse the current token and
-// return a primitive type enum value
-int parse_type(void) 
-{
+
+// Parse the current token and return
+// a primitive type enum value. Also
+// scan in the next token
+int parse_type(void) {
   int type;
-  switch (Token.token)
-  {
-    case VOID_T: type = VOID_P; break;
-    case CHAR_T: type = CHAR_P; break;
-    case INT_T:  type = INT_P;  break;
-    case LONG_T: type = LONG_P; break;
-    default: fatald("Illegal type, token", Token.token);
+  switch (Token.token) {
+    case T_VOID:
+      type = P_VOID;
+      break;
+    case T_CHAR:
+      type = P_CHAR;
+      break;
+    case T_INT:
+      type = P_INT;
+      break;
+    case T_LONG:
+      type = P_LONG;
+      break;
+    default:
+      fatald("Illegal type, token", Token.token);
   }
 
-  // Scan in one or more further '*' tokens
+  // Scan in one or more further '*' tokens 
   // and determine the correct pointer type
-  while (1)
-  {
+  while (1) {
     scan(&Token);
-    if (Token.token != STAR_T)
+    if (Token.token != T_STAR)
       break;
     type = pointer_to(type);
   }
@@ -33,43 +40,28 @@ int parse_type(void)
   return (type);
 }
 
-// Parse the declaration of a variable
-void var_declaration(int type) 
-{
+// variable_declaration: type identifier ';'  ;
+//
+// Parse the declaration of a variable.
+// The identifier has been scanned & we have the type
+void var_declaration(int type) {
   int id;
 
-  while (1)
-  {
-    // Text now has the identifier's name.
-    // Add it as a known identifier
-    // and generate its space in assembly
-    id = addglob(Text, type, VARIABLE_S, 0);
-    genglobsym(id);
-
-    // If the next token is a semicolon,
-    // skip it and return.
-    if (Token.token == SEMI_T)
-    {
-      scan(&Token);
-      return;
-    }
-
-    // If the next token is a comma, skip it,
-    // get the identifier and loopback
-    if (Token.token == COMMA_T)
-    {
-      scan(&Token);
-      ident();
-      continue;
-    }
-    fatal("Missing , or ; after identifier"); 
-  }  
+  // Text now has the identifier's name.
+  // Add it as a known identifier
+  // and generate its space in assembly
+  id = addglob(Text, type, S_VARIABLE, 0);
+  genglobsym(id);
+  // Get the trailing semicolon
+  semi();
 }
 
-// Parse the declaration of a simplistic function,
+//
+// function_declaration: type identifier '(' ')' compound_statement   ;
+//
+// Parse the declaration of a simplistic function.
 // The identifier has been scanned & we have the type
-AST_T *function_declaration(int type) 
-{
+AST_T *function_declaration(int type) {
   AST_T *tree, *finalstmt;
   int nameslot, endlabel;
 
@@ -78,7 +70,7 @@ AST_T *function_declaration(int type)
   // to the symbol table, and set the Functionid global
   // to the function's symbol-id
   endlabel = genlabel();
-  nameslot = addglob(Text, type, FUNCTION_S, endlabel);
+  nameslot = addglob(Text, type, S_FUNCTION, endlabel);
   Functionid = nameslot;
 
   // Scan in the parentheses
@@ -88,54 +80,54 @@ AST_T *function_declaration(int type)
   // Get the AST tree for the compound statement
   tree = compound_statement();
 
-  // If the function type isn't VOID_P...
-  if (type != VOID_P) 
-  {
-    // Error ifno statemetns in the function
+  // If the function type isn't P_VOID ..
+  if (type != P_VOID) {
+
+    // Error if no statements in the function
     if (tree == NULL)
       fatal("No statements in function with non-void type");
 
     // Check that the last AST operation in the
-    // compound statementwas a return statement
-    finalstmt = (tree->op == GLUE_A) ? tree->right : tree;
-    if (finalstmt == NULL || finalstmt->op != RETURN_A)
+    // compound statement was a return statement
+    finalstmt = (tree->op == A_GLUE) ? tree->right : tree;
+    if (finalstmt == NULL || finalstmt->op != A_RETURN)
       fatal("No return for function with non-void type");
   }
   // Return an A_FUNCTION node which has the function's nameslot
   // and the compound statement sub-tree
-  return (mkastunary(FUNCTION_A, type, tree, nameslot));
+  return (mkastunary(A_FUNCTION, type, tree, nameslot));
 }
 
 
 // Parse one or more global declarations, either
 // variables or functions
-void global_declarations(void)
-{
+void global_declarations(void) {
   AST_T *tree;
   int type;
 
-  while (1)
-  { 
+  while (1) {
+
     // We have to read past the type and identifier
     // to see either a '(' for a function declaration
     // or a ',' or ';' for a variable declaration.
     // Text is filled in by the ident() call.
     type = parse_type();
     ident();
-    if (Token.token == LPAREN_T)
-    { 
-      // Pase the function declaration and
-      // generate the assembly code for it
-      tree = function_declaration(type);
-      genAST(tree, NOREG, 0);
+    if (Token.token == T_LPAREN) {
+
+       // Parse the function declaration and
+       // generate the assembly code for it
+       tree = function_declaration(type);
+       if (O_dumpAST) { dumpAST(tree, NOLABEL, 0); fprintf(stdout, "\n\n"); }
+       genAST(tree, NOLABEL, 0);
+    } else {
+
+       // Parse the global variable declaration
+       var_declaration(type);
     }
-    else
-    {
-      // Parse the global variable declaration
-      var_declaration(type);
-    }
+
     // Stop when we have reached EOF
-    if (Token.token == EOF_T)
+    if (Token.token == T_EOF)
       break;
   }
 }
