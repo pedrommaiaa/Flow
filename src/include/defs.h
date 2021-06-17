@@ -23,7 +23,7 @@ typedef struct token {
     // Structural tokens
     INTLIT_T, SEMI_T, ASSIGN_T, IDENT_T,
     LBRACE_T, RBRACE_T, LPAREN_T, RPAREN_T,
-    AMPER_T,
+    AMPER_T, COMMA_T,
     // Other keywords
     PRINT_T, IF_T, ELSE_T, WHILE_T, FOR_T, RETURN_T,
     AND_T

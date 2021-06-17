@@ -75,10 +75,12 @@ int findglob(char *s);
 int addglob(char *name, int type, int stype, int endlabel);
 
 // decl.c
-void var_declaration(void);
-AST_T *function_declaration(void);
+void var_declaration(int type);
+AST_T *function_declaration(int type);
+void global_declarations(void);
 
 // types.c
+int parse_type(void);
 int type_compatible(int *left, int *right, int onlyright);
 int pointer_to(int type);
 int value_at(int type);

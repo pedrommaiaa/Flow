@@ -221,12 +221,18 @@ static AST_T *return_statement(void)
 // and return its AST
 static AST_T *single_statement(void) 
 {
+  int type;
+
   switch (Token.token) 
   {
     case PRINT_T: return (print_statement());
     case CHAR_T:
-    case INT_T:
-    case LONG_T: var_declaration(); return (NULL);		// No AST generated here
+    case INT_T: 
+    case LONG_T: 
+      type = parse_type(); 
+      ident(); 
+      var_declaration(type); 
+      return (NULL);		// No AST generated here
     case IDENT_T: return (assignment_statement());
     case IF_T: return (if_statement());
     case WHILE_T: return (while_statement());

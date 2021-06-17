@@ -25,7 +25,6 @@ static void usage(char *prog) {
 // file and call scanfile() to scan the tokens in it.
 int main(int argc, char *argv[]) 
 {
-  AST_T *tree;
 
   if (argc != 2)
     usage(argv[0]);
@@ -52,14 +51,8 @@ int main(int argc, char *argv[])
   
   scan(&Token);			                 // Get the first token from the input
   genpreamble();                     // Output the preamble
-  while (1)                          
-  {
-    tree = function_declaration();   // Parse a function and
-    genAST(tree, NOREG, 0);          // Generate the assembly code for it
-    if (Token.token == EOF_T)        // Stop when we have reached EOF
-      break;
-  }
-  genpostamble();
+  global_declarations();             // Parse the global declarations
+  genpostamble();                    // Output the postamble
   fclose(Outfile);                   // Close the output file and exit
   return(0);
 }
