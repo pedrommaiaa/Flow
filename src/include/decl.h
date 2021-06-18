@@ -84,6 +84,7 @@ struct ASTnode *function_declaration(int type);
 void global_declarations(void);
 
 // types.c
+int inttype(int type);
 int parse_type(void);
 int pointer_to(int type);
 int value_at(int type);

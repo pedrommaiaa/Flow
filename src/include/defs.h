@@ -5,7 +5,7 @@
 
 // Structure and enum definitions
 
-#define TEXTLEN		512	// Length of symbols in input
+#define TEXTLEN		      512	  // Length of symbols in input
 #define NSYMBOLS        1024	// Number of symbol table entries
 
 // Token types
@@ -22,6 +22,7 @@ enum {
   // Structural tokens
   T_INTLIT, T_SEMI, T_IDENT,
   T_LBRACE, T_RBRACE, T_LPAREN, T_RPAREN,
+  T_LBRACKET, T_RBRACKET,
   T_AMPER, T_LOGAND,
   // Other keywords
   T_IF, T_ELSE, T_WHILE, T_FOR, T_RETURN
@@ -29,8 +30,8 @@ enum {
 
 // Token structure
 typedef struct token {
-  int token;			// Token type, from the enum list above
-  int intvalue;			// For T_INTLIT, the integer value
+  int token;			        // Token type, from the enum list above
+  int intvalue;			      // For T_INTLIT, the integer value
 }token_T;
 
 // AST node types. The first few line up
@@ -51,33 +52,33 @@ enum {
 
 // Abstract Syntax Tree structure
 typedef struct ASTnode {
-  int op;			// "Operation" to be performed on this tree
-  int type;			// Type of any expression this tree generates
-  int rvalue;			// True if the node is an rvalue
-  struct ASTnode *left;		// Left, middle and right child trees
+  int op;			            // "Operation" to be performed on this tree
+  int type;			          // Type of any expression this tree generates
+  int rvalue;			        // True if the node is an rvalue
+  struct ASTnode *left;	  // Left, middle and right child trees
   struct ASTnode *mid;
   struct ASTnode *right;
-  union {			// For A_INTLIT, the integer value
-    int intvalue;		// For A_IDENT, the symbol slot number
-    int id;			// For A_FUNCTION, the symbol slot number
-    int size;			// For A_SCALE, the size to scale by
-  } v;				// For A_FUNCCALL, the symbol slot number
+  union {			            // For A_INTLIT, the integer value
+    int intvalue;		      // For A_IDENT, the symbol slot number
+    int id;			          // For A_FUNCTION, the symbol slot number
+    int size;			        // For A_SCALE, the size to scale by
+  } v;				            // For A_FUNCCALL, the symbol slot number
 } AST_T;
 
-#define NOREG	-1		// Use NOREG when the AST generation
-				// functions have no register to return
-#define NOLABEL	 0		// Use NOLABEL when we have no label to
-				// pass to genAST()
+#define NOREG	-1		      // Use NOREG when the AST generation
+				                  // functions have no register to return
+#define NOLABEL	 0		    // Use NOLABEL when we have no label to
+				                  // pass to genAST()
 
 // Structural types
 enum {
-  S_VARIABLE, S_FUNCTION
+  S_VARIABLE, S_FUNCTION, S_ARRAY
 };
 
 // Symbol table structure
 typedef struct symtable {
-  char *name;			// Name of a symbol
-  int type;			// Primitive type for the symbol
-  int stype;			// Structural type for the symbol
-  int endlabel;			// For S_FUNCTIONs, the end label
+  char *name;			        // Name of a symbol
+  int type;			          // Primitive type for the symbol
+  int stype;			        // Structural type for the symbol
+  int endlabel;			      // For S_FUNCTIONs, the end label
 }SymTable_T;
