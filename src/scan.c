@@ -256,7 +256,7 @@ int scan(token_T *t) {
     case '^': t->token = T_XOR; break; 
     case '|': t->token = T_OR; break; 
     case '=': if ((c = next()) == '=') { t->token = T_EQ; } else { putback(c); t->token = T_ASSIGN; } break;
-    case '!': if ((c = next()) == '=') { t->token = T_NE; } else { fatalc("Unrecognised character", c); } break;
+    case '!': if ((c = next()) == '=') { t->token = T_NE; } else { fatalc("Unrecognised character, use 'not' instead", c); } break;
     case '<': 
       if ((c = next()) == '=') { 
         t->token = T_LE; 
