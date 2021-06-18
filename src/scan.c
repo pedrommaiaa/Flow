@@ -18,6 +18,7 @@ static int next(void) {
   c = fgetc(Infile);		// Read from input file
   if ('\n' == c)
     Line++;			// Increment line count
+
   return (c);
 }
 
@@ -38,6 +39,7 @@ static int skip(void) {
   }
   return (c);
 }
+
 
 
 // Return the next character froma character
@@ -226,6 +228,13 @@ int scan(token_T *t) {
   }
   // Skip whitespace
   c = skip();
+
+  if (c == '#')
+  {
+    while (c != '\n')
+      c = next();
+    c = skip();
+  }
 
   // Determine the token based on
   // the input character

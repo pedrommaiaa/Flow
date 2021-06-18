@@ -1,9 +1,28 @@
 char *str;
+int a;
+int b;
 
 int main()
 {
-  for (str = "Pedro Maia\n"; *str != 0; str = str + 1){
-    printchar(*str);
+  a = 1; b = 0;# this is a comment
+
+  if (not b)
+  {
+    for (str = "negation of 0 becomming 1 is working\n"; *str; str++)
+    {
+      printchar(*str); # this is a comment
+    }
+
   }
+
+  if (not a)
+  {
+    printint(24);
+  } else { # this is a comment
+    printint(10);
+  }
+  # test comment
+  
+
   return(0);
 }
