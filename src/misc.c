@@ -46,6 +46,7 @@ void ident(void) {
   match(T_IDENT, "identifier");
 }
 
+
 // Print out fatal messages
 void fatal(char *s) {
   fprintf(stderr, "%s on line %d\n", s, Line);

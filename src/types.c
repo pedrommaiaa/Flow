@@ -95,7 +95,9 @@ AST_T *modify_type(AST_T *tree, int rtype, int op) {
     if (inttype(ltype) && ptrtype(rtype)) {
       rsize = genprimsize(value_at(rtype));
       if (rsize > 1) 
-	return (mkastunary(A_SCALE, rtype, tree, rsize));
+	      return (mkastunary(A_SCALE, rtype, tree, rsize));
+      else
+        return (tree); // Size 1, no need to scale
     }
   }
   // If we get here, the types are not compatible

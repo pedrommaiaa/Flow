@@ -2,26 +2,27 @@
 
 
 // scan.c
-void reject_token(struct token *t);
-int scan(struct token *t);
+void reject_token(token_T *t);
+int scan(token_T *t);
 
 // tree.c
-struct ASTnode *mkastnode(int op, int type,
-			  struct ASTnode *left,
-			  struct ASTnode *mid,
-			  struct ASTnode *right, int intvalue);
-struct ASTnode *mkastleaf(int op, int type, int intvalue);
-struct ASTnode *mkastunary(int op, int type,
-			    struct ASTnode *left, int intvalue);
-void dumpAST(struct ASTnode *n, int label, int parentASTop);
+AST_T *mkastnode(int op, int type,
+			  AST_T *left,
+			  AST_T *mid,
+			  AST_T *right, int intvalue);
+AST_T *mkastleaf(int op, int type, int intvalue);
+AST_T *mkastunary(int op, int type,
+			    AST_T *left, int intvalue);
+void dumpAST(AST_T *n, int label, int parentASTop);
 
 // gen.c
 int genlabel(void);
-int genAST(struct ASTnode *n, int reg, int parentASTop);
+int genAST(AST_T *n, int reg, int parentASTop);
 void genpreamble();
 void genpostamble();
 void genfreeregs();
 void genglobsym(int id);
+int genglobstr(char *strvalue);
 int genprimsize(int type);
 void genreturn(int reg, int id);
 
@@ -33,6 +34,7 @@ void cgfuncpreamble(int id);
 void cgfuncpostamble(int id);
 int cgloadint(int value, int type);
 int cgloadglob(int id);
+int cgloadglobstr(int id);
 int cgadd(int r1, int r2);
 int cgsub(int r1, int r2);
 int cgmul(int r1, int r2);
@@ -41,6 +43,7 @@ int cgshlconst(int r, int val);
 int cgcall(int r, int id);
 int cgstorglob(int r, int id);
 void cgglobsym(int id);
+void cgglobstr(int l, char *strvalue);
 int cgcompare_and_set(int ASTop, int r1, int r2);
 int cgcompare_and_jump(int ASTop, int r1, int r2, int label);
 void cglabel(int l);
@@ -53,11 +56,10 @@ int cgderef(int r, int type);
 int cgstorderef(int r1, int r2, int type);
 
 // expr.c
-struct ASTnode *funccall(void);
-struct ASTnode *binexpr(int ptp);
+AST_T *binexpr(int ptp);
 
 // stmt.c
-struct ASTnode *compound_statement(void);
+AST_T *compound_statement(void);
 
 // misc.c
 void match(int t, char *what);
@@ -78,7 +80,7 @@ int addglob(char *name, int type, int stype, int endlabel, int size);
 
 // decl.c
 void var_declaration(int type);
-struct ASTnode *function_declaration(int type);
+AST_T *function_declaration(int type);
 void global_declarations(void);
 
 // types.c
@@ -86,4 +88,4 @@ int inttype(int type);
 int parse_type(void);
 int pointer_to(int type);
 int value_at(int type);
-struct ASTnode *modify_type(struct ASTnode *tree, int rtype, int op);
+AST_T *modify_type(AST_T *tree, int rtype, int op);

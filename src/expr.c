@@ -7,7 +7,7 @@
 
 // Parse a function call with a single expression
 // argument and return its AST
-AST_T *funccall(void) {
+static AST_T *funccall(void) {
   AST_T *tree;
   int id;
 
@@ -86,6 +86,13 @@ static AST_T *primary(void) {
 	      n = mkastleaf(A_INTLIT, P_CHAR, Token.intvalue);
       else
 	      n = mkastleaf(A_INTLIT, P_INT, Token.intvalue);
+      break;
+
+    case T_STRLIT:
+      // For a STRLIT token, generate the assembly for it.
+      // Then make a leaf AST node for it. id is the string's label.
+      id = genglobstr(Text);
+      n = mkastleaf(A_STRLIT, P_CHARPTR, id);
       break;
 
     case T_IDENT:
