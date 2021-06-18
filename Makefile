@@ -14,3 +14,8 @@ test2: flow tests/input21.flow lib/printint.c
 	./flow tests/input21.flow 
 	gcc -o out out.s lib/printint.c
 	./out
+
+test3: flow tests/test.flow lib/printint.c
+	./flow tests/test.flow 
+	gcc -o out out.s lib/printint.c
+	./out

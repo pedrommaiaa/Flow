@@ -61,6 +61,7 @@ static int scanch(void)
       case 't': return '\t';
       case 'v': return '\v';
       case '"': return '"';
+      case '\\': return '\\';
       case '\'': return '\'';
       default: fatalc("Unknown escape sequence", c);
     }
