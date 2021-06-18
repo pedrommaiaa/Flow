@@ -77,7 +77,8 @@ global_declaration: function_declaration | var_declaration
 function_declaration: type identifier '(' ')' compound_statement
     ;
 
-var_declaration: type identifier_list ';'
+variable_declaration: type identifier_List ';'
+    | type identifier '[' P_INTLIT ']' ';'
     ;
 
 type: type_keyword opt_pointer
@@ -108,3 +109,7 @@ primary_expression: IDENTIFIER
     | STRING_LITERAL
     | '(' expression ')'
     ;
+
+postfix_expression : primary_expression
+    | postfix_expression '[' expression ']'
+

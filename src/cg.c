@@ -4,7 +4,6 @@
 
 // Code generator for x86-64
 
-
 // List of available registers and their names.
 // We need a list of byte and doubleword registers, too
 static int freereg[4];
@@ -139,13 +138,6 @@ int cgdiv(int r1, int r2) {
   return (r1);
 }
 
-// Call printint() with the given register
-void cgprintint(int r) {
-  fprintf(Outfile, "\tmovq\t%s, %%rdi\n", reglist[r]);
-  fprintf(Outfile, "\tcall\tprintint\n");
-  free_register(r);
-}
-
 // Call a function with one argument from the given register
 // Return the register with the result
 int cgcall(int r, int id) {
@@ -206,12 +198,18 @@ void cgglobsym(int id) {
   // Get the size of the type
   typesize = cgprimsize(Gsym[id].type);
 
+  // Generate the global identity and the label
   fprintf(Outfile, "\t.data\n" "\t.globl\t%s\n", Gsym[id].name);
-  switch(typesize) {
-    case 1: fprintf(Outfile, "%s:\t.byte\t0\n", Gsym[id].name); break;
-    case 4: fprintf(Outfile, "%s:\t.long\t0\n", Gsym[id].name); break;
-    case 8: fprintf(Outfile, "%s:\t.quad\t0\n", Gsym[id].name); break;
-    default: fatald("Unknown typesize in cgglobsym: ", typesize);
+  fprintf(Outfile, "%s:", Gsym[id].name);
+
+  // Generate the space
+  for (int i=0; i < Gsym[id].size; i++) {
+    switch(typesize) {
+      case 1: fprintf(Outfile, "\t.byte\t0\n"); break;
+      case 4: fprintf(Outfile, "\t.long\t0\n"); break;
+      case 8: fprintf(Outfile, "\t.quad\t0\n"); break;
+      default: fatald("Unknown typesize in cgglobsym: ", typesize);
+    }
   }
 }
 

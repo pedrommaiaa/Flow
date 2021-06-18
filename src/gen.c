@@ -186,21 +186,23 @@ int genAST(AST_T *n, int label, int parentASTop) {
   return (NOREG);		// Keep -Wall happy
 }
 
+
 void genpreamble() {
   cgpreamble();
 }
+
 void genpostamble() {
   cgpostamble();
 }
+
 void genfreeregs() {
   freeall_registers();
 }
-void genprintint(int reg) {
-  cgprintint(reg);
-}
+
 void genglobsym(int id) {
   cgglobsym(id);
 }
+
 int genprimsize(int type) {
   return (cgprimsize(type));
 }

@@ -81,4 +81,5 @@ typedef struct symtable {
   int type;			          // Primitive type for the symbol
   int stype;			        // Structural type for the symbol
   int endlabel;			      // For S_FUNCTIONs, the end label
+  int size;               // Number of elements in the symbol
 }SymTable_T;

@@ -169,6 +169,8 @@ int scan(token_T *t) {
     case '}': t->token = T_RBRACE; break;
     case '(': t->token = T_LPAREN; break;
     case ')': t->token = T_RPAREN; break;
+    case '[': t->token = T_LBRACKET; break;
+    case ']': t->token = T_RBRACKET; break; 
     case '=': if ((c = next()) == '=') { t->token = T_EQ; } else { putback(c); t->token = T_ASSIGN; } break;
     case '!': if ((c = next()) == '=') { t->token = T_NE; } else { fatalc("Unrecognised character", c); } break;
     case '<': if ((c = next()) == '=') { t->token = T_LE; } else { putback(c); t->token = T_LT; } break;
