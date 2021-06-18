@@ -117,10 +117,17 @@ int genAST(AST_T *n, int label, int parentASTop) {
     rightreg = genAST(n->right, NOLABEL, n->op);
 
   switch (n->op) {
-    case A_ADD: return (cgadd(leftreg, rightreg));
+    case A_ADD:      return (cgadd(leftreg, rightreg));
     case A_SUBTRACT: return (cgsub(leftreg, rightreg));
     case A_MULTIPLY: return (cgmul(leftreg, rightreg));
-    case A_DIVIDE: return (cgdiv(leftreg, rightreg));
+    case A_DIVIDE:   return (cgdiv(leftreg, rightreg));
+    
+    case A_AND:    return (cgand(leftreg, rightreg));
+    case A_OR:     return (cgor(leftreg, rightreg));
+    case A_XOR:    return (cgxor(leftreg, rightreg));
+    case A_LSHIFT: return (cgshl(leftreg, rightreg));
+    case A_RSHIFT: return (cgshr(leftreg, rightreg));
+
     case A_EQ:
     case A_NE:
     case A_LT:
@@ -131,9 +138,9 @@ int genAST(AST_T *n, int label, int parentASTop) {
       // a compare followed by a jump. Otherwise, compare registers
       // and set one to 1 or 0 based on the comparison.
       if (parentASTop == A_IF || parentASTop == A_WHILE)
-	return (cgcompare_and_jump(n->op, leftreg, rightreg, label));
+	      return (cgcompare_and_jump(n->op, leftreg, rightreg, label));
       else
-	return (cgcompare_and_set(n->op, leftreg, rightreg));
+	      return (cgcompare_and_set(n->op, leftreg, rightreg));
     case A_INTLIT:
       return (cgloadint(n->v.intvalue, n->type));
     case A_STRLIT:
@@ -142,14 +149,14 @@ int genAST(AST_T *n, int label, int parentASTop) {
       // Load our value if we are an rvalue
       // or we are being dereferenced
       if (n->rvalue || parentASTop== A_DEREF)
-        return (cgloadglob(n->v.id));
+        return (cgloadglob(n->v.id, n->op));
       else
         return (NOREG);
     case A_ASSIGN:
       // Are we assigning to an identifier or through a pointer?
       switch (n->right->op) {
         case A_IDENT: return (cgstorglob(leftreg, n->right->v.id));
-	case A_DEREF: return (cgstorderef(leftreg, rightreg, n->right->type));
+	      case A_DEREF: return (cgstorderef(leftreg, rightreg, n->right->type));
         default: fatald("Can't A_ASSIGN in genAST(), op", n->op);
       }
     case A_WIDEN:
@@ -182,6 +189,31 @@ int genAST(AST_T *n, int label, int parentASTop) {
             rightreg= cgloadint(n->v.size, P_INT);
             return (cgmul(leftreg, rightreg));
       }
+    case A_POSTINC:
+      // Load the variable's value into a register,
+      // then increment it
+      return (cgloadglob(n->v.id, n->op));
+    case A_POSTDEC:
+      // Load the variable's value into a register,
+      // then decrement it
+      return (cgloadglob(n->v.id, n->op));
+    case A_PREINC:
+      // Load and increment the variable's value into a register
+      return (cgloadglob(n->left->v.id, n->op));
+    case A_PREDEC:
+      // Load and decrement the variable's value into a register
+      return (cgloadglob(n->left->v.id, n->op));
+    case A_NEGATE:
+      return (cgnegate(leftreg));
+    case A_INVERT:
+      return (cginvert(leftreg));
+    case A_LOGNOT:
+      return (cglognot(leftreg));
+    case A_TOBOOL:
+      // If the parent AST node is an A_IF or A_WHILE, generate
+      // a compare followed by a jump. Otherwise, set the register
+      // to 0 or 1 based on it's zeroeness or non-zeroeness
+      return (cgboolean(leftreg, parentASTop, label));
     default:
       fatald("Unknown AST operator", n->op);
   }

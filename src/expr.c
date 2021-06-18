@@ -72,6 +72,52 @@ static AST_T *array_access(void)
 }
 
 
+// Parse a postfix expression and return
+// an AST node representing it. The
+// identifier is already in Text.
+static AST_T *postfix(void)
+{
+  AST_T *n;
+  int id;
+
+  // Scan in the next token to see if we have postfix expression
+  scan(&Token);
+
+  // Function call
+  if (Token.token == T_LPAREN)
+    return (funccall());
+
+  // An array reference
+  if (Token.token == T_LBRACKET)
+    return (array_access());
+
+  // A variable. Check that the variable exists.
+  id = findglob(Text);
+  if (id == -1 || Gsym[id].stype != S_VARIABLE)
+    fatals("Unknown variable", Text);
+
+  switch (Token.token)
+  {
+    // Post-increment: skip over the token
+    case T_INC:
+      scan(&Token);
+      n = mkastleaf(A_POSTINC, Gsym[id].type, id);
+      break;
+
+    // Post-decrement: skip over the token
+    case T_DEC:
+      scan(&Token);
+      n = mkastleaf(A_POSTDEC, Gsym[id].type, id);
+      break;
+
+    // Just a variable reference
+    default: n = mkastleaf(A_IDENT, Gsym[id].type, id);
+  }
+  return (n);
+}
+
+
+
 // Parse a primary factor and return an
 // AST node representing it.
 static AST_T *primary(void) {
@@ -96,29 +142,7 @@ static AST_T *primary(void) {
       break;
 
     case T_IDENT:
-      // This could be a variable or a function call.
-      // Scan in the next token to find out
-      scan(&Token);
-
-      // It's a '(', so a function call
-      if (Token.token == T_LPAREN)
-	      return (funccall());
-
-      // It's a '[', so an array reference
-      if (Token.token == T_LBRACKET)
-	      return (array_access());
-
-      // Not a function call, so reject the new token
-      reject_token(&Token);
-
-      // Check that the variable exists. XXX Add structural type test
-      id = findglob(Text);
-      if (id == -1 || Gsym[id].stype != S_VARIABLE)
-	      fatals("Unknown variable", Text);
-
-      // Make a leaf AST node for it
-      n = mkastleaf(A_IDENT, Gsym[id].type, id);
-      break;
+      return (postfix());
 
     case T_LPAREN:
       // Beginning of a parenthesised expression, skip the '('.
@@ -141,7 +165,7 @@ static AST_T *primary(void) {
 // Convert a binary operator token into a binary AST operation.
 // We rely on a 1:1 mapping from token to AST operation
 static int binastop(int tokentype) {
-  if (tokentype > T_EOF && tokentype < T_INTLIT)
+  if (tokentype > T_EOF && tokentype <= T_SLASH)
     return (tokentype);
   fatald("Syntax error, token", tokentype);
   return (0);			// Keep -Wall happy
@@ -158,18 +182,20 @@ static int rightassoc(int tokentype) {
 // Operator precedence for each token. Must
 // match up with the order of tokens in defs.h
 static int OpPrec[] = {
-   0, 10,			      // T_EOF,  T_ASSIGN
-  20, 20,			      // T_PLUS, T_MINUS
-  30, 30,			      // T_STAR, T_SLASH
-  40, 40,			      // T_EQ, T_NE
-  50, 50, 50, 50		// T_LT, T_GT, T_LE, T_GE
+   0, 10, 20, 30,			      // T_EOF,  T_ASSIGN, T_LOGOR, T_LOGAND,
+   40, 50, 60,			        // T_OR, T_XOR, T_AMPER,
+   70, 70,			            // T_EQ, T_NE,
+   80, 80, 80, 80,          // T_LT, T_GT, T_LE, T_GE,
+   90, 90,                  // T_LSHIFT, T_RSHIFT,
+   100, 100,                // T_PLUS, T_MINUS
+   110, 110,                // T_STAR, T_SLASH
 };
 
 // Check that we have a binary operator and
 // return its precedence.
 static int op_precedence(int tokentype) {
   int prec;
-  if (tokentype >= T_VOID)
+  if (tokentype > T_SLASH)
     fatald("Token with no precedence in op_precedence:", tokentype);
   prec = OpPrec[tokentype];
   if (prec == 0)
@@ -212,6 +238,73 @@ AST_T *prefix(void) {
       // Prepend an A_DEREF operation to the tree
       tree = mkastunary(A_DEREF, value_at(tree->type), tree, 0);
       break;
+
+    case T_MINUS:
+      // Get the next token and parse it
+      // recursively as a prefix expression
+      scan(&Token);
+      tree = prefix();
+
+      // Prepend a A_NEGATE operation to the tree and
+      // make the child an rvalue. Because chars are unsigned,
+      // also widen this to int so that it's signed
+      tree->rvalue = 1;
+      tree = modify_type(tree, P_INT, 0);
+      tree = mkastunary(A_NEGATE, tree->type, tree, 0);
+      break;
+    
+    case T_INVERT:
+      // Get the next token and parse it
+      // recursively as a prefix expression
+      scan(&Token);
+      tree = prefix();
+
+      // Prepend a A_INVERT operation to the tree and
+      // make the child an rvalue.
+      tree->rvalue = 1;
+      tree = mkastunary(A_INVERT, tree->type, tree, 0);
+      break;
+    
+    case T_LOGNOT:
+      // Get the next token and parse it
+      // recursively as a prefix expression
+      scan(&Token);
+      tree = prefix();
+
+      // Prepend a A_LOGNOT operation to the tree and
+      // make the child an rvalue.
+      tree->rvalue = 1;
+      tree = mkastunary(A_LOGNOT, tree->type, tree, 0);
+      break;
+    
+    case T_INC:
+      // Get the next token and parse it
+      // recursively as a prefix expression
+      scan(&Token);
+      tree = prefix();
+
+      // For now, ensure it's an identifier
+      if (tree->op != A_IDENT)
+	      fatal("++ operator must be followed by an identifier");
+
+      // Prepend an A_PREINC operation to the tree
+      tree = mkastunary(A_PREINC, tree->type, tree, 0);
+      break;
+    
+    case T_DEC:
+      // Get the next token and parse it
+      // recursively as a prefix expression
+      scan(&Token);
+      tree = prefix();
+
+      // For now, ensure it's an identifier
+      if (tree->op != A_IDENT)
+	      fatal("-- operator must be followed by an identifier");
+
+      // Prepend an A_PREDEC operation to the tree
+      tree = mkastunary(A_PREDEC, tree->type, tree, 0);
+      break;
+
     default:
       tree = primary();
   }

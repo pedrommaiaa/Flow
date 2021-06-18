@@ -153,39 +153,51 @@ static int scanident(int c, char *buf, int lim) {
 // to waste time strcmp()ing against all the keywords.
 static int keyword(char *s) {
   switch (*s) {
+    case 'a':
+      if (!strcmp(s, "and"))
+	      return (T_LOGAND);
+      break;
     case 'c':
       if (!strcmp(s, "char"))
-	return (T_CHAR);
+	      return (T_CHAR);
       break;
     case 'e':
       if (!strcmp(s, "else"))
-	return (T_ELSE);
+	      return (T_ELSE);
       break;
     case 'f':
       if (!strcmp(s, "for"))
-	return (T_FOR);
+	      return (T_FOR);
       break;
     case 'i':
       if (!strcmp(s, "if"))
-	return (T_IF);
+	      return (T_IF);
       if (!strcmp(s, "int"))
-	return (T_INT);
+	      return (T_INT);
       break;
     case 'l':
       if (!strcmp(s, "long"))
-	return (T_LONG);
+	      return (T_LONG);
+      break;
+    case 'n':
+      if (!strcmp(s, "not"))
+	      return (T_LOGNOT);
+      break;
+    case 'o':
+      if (!strcmp(s, "or"))
+	      return (T_LOGOR);
       break;
     case 'r':
       if (!strcmp(s, "return"))
-	return (T_RETURN);
+	      return (T_RETURN);
       break;
     case 'w':
       if (!strcmp(s, "while"))
-	return (T_WHILE);
+	      return (T_WHILE);
       break;
     case 'v':
       if (!strcmp(s, "void"))
-	return (T_VOID);
+	      return (T_VOID);
       break;
   }
   return (0);
@@ -219,8 +231,8 @@ int scan(token_T *t) {
   // the input character
   switch (c) {
     case EOF: t->token = T_EOF; return (0);
-    case '+': t->token = T_PLUS; break;
-    case '-': t->token = T_MINUS; break;
+    case '+': if ((c = next()) == '+') { t->token = T_INC; } else { putback(c); t->token = T_PLUS; } break;
+    case '-': if ((c = next()) == '-') {t->token = T_DEC; } else { putback(c); t->token = T_MINUS; } break;
     case '*': t->token = T_STAR; break;
     case '/': t->token = T_SLASH; break;
     case ';': t->token = T_SEMI; break;
@@ -230,11 +242,31 @@ int scan(token_T *t) {
     case ')': t->token = T_RPAREN; break;
     case '[': t->token = T_LBRACKET; break;
     case ']': t->token = T_RBRACKET; break; 
+    case '~': t->token = T_INVERT; break; 
+    case '&': t->token = T_AMPER; break;
+    case '^': t->token = T_XOR; break; 
+    case '|': t->token = T_OR; break; 
     case '=': if ((c = next()) == '=') { t->token = T_EQ; } else { putback(c); t->token = T_ASSIGN; } break;
     case '!': if ((c = next()) == '=') { t->token = T_NE; } else { fatalc("Unrecognised character", c); } break;
-    case '<': if ((c = next()) == '=') { t->token = T_LE; } else { putback(c); t->token = T_LT; } break;
-    case '>': if ((c = next()) == '=') { t->token = T_GE; } else { putback(c); t->token = T_GT; } break;
-    case '&': if ((c = next()) == '&') { t->token = T_LOGAND; } else { putback(c); t->token = T_AMPER; } break;
+    case '<': 
+      if ((c = next()) == '=') { 
+        t->token = T_LE; 
+      } else if (c == '<') {
+        t->token = T_LSHIFT; 
+      } else { 
+        putback(c); t->token = T_LT; 
+      } 
+      break;
+    case '>': 
+      if ((c = next()) == '=') { 
+        t->token = T_GE; 
+      } else if (c == '>') {
+        t->token = T_RSHIFT;
+      } else { 
+        putback(c); 
+        t->token = T_GT; 
+      } 
+      break;
     case '\'':
       // If it's a quote, scan in the
       // literal character value and

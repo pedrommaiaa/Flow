@@ -23,7 +23,7 @@ static AST_T *if_statement(void) {
   // the tree's operation is a comparison.
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
-    fatal("Bad comparison operator");
+    condAST = mkastunary(A_TOBOOL, condAST->type, condAST, 0);
   rparen();
 
   // Get the AST for the compound statement
@@ -53,7 +53,7 @@ static AST_T *while_statement(void) {
   // the tree's operation is a comparison.
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
-    fatal("Bad comparison operator");
+    condAST = mkastunary(A_TOBOOL, condAST->type, condAST, 0);
   rparen();
 
   // Get the AST for the compound statement
@@ -81,7 +81,7 @@ static AST_T *for_statement(void) {
   // Get the condition and the ';'
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
-    fatal("Bad comparison operator");
+    condAST = mkastunary(A_TOBOOL, condAST->type, condAST, 0);
   semi();
 
   // Get the post_op statement and the ')'
@@ -185,9 +185,9 @@ AST_T *compound_statement(void) {
     // new tree together
     if (tree != NULL) {
       if (left == NULL)
-	left = tree;
+	      left = tree;
       else
-	left = mkastnode(A_GLUE, P_NONE, left, NULL, tree, 0);
+	      left = mkastnode(A_GLUE, P_NONE, left, NULL, tree, 0);
     }
 
     // When we hit a right curly bracket,
