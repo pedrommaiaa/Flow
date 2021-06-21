@@ -4,6 +4,6 @@ int fred() {
 
 void main() {
   int x;
-  x = fred(2);
+  x= fred(2);
   printint(x);
 }

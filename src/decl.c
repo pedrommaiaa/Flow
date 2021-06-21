@@ -2,6 +2,7 @@
 #include "include/data.h"
 #include "include/decl.h"
 
+
 // Parsing of declarations
 
 
@@ -11,10 +12,18 @@
 int parse_type(void) {
   int type;
   switch (Token.token) {
-    case T_VOID: type = P_VOID; break;
-    case T_CHAR: type = P_CHAR; break;
-    case T_INT:  type = P_INT;  break;
-    case T_LONG: type = P_LONG; break;
+    case T_VOID:
+      type = P_VOID;
+      break;
+    case T_CHAR:
+      type = P_CHAR;
+      break;
+    case T_INT:
+      type = P_INT;
+      break;
+    case T_LONG:
+      type = P_LONG;
+      break;
     default:
       fatald("Illegal type, token", Token.token);
   }
@@ -32,41 +41,45 @@ int parse_type(void) {
   return (type);
 }
 
-// Parse the declaration of a variable.
+
+// Parse the declaration of a scalar variable or an array
+// with a given size.
 // The identifier has been scanned & we have the type
-void var_declaration(int type) {
-  int id;
- 
+void var_declaration(int type, int islocal) {
+
   // Text now has the identifier's name.
-  // If the enxt token is a '['
-  if (Token.token == T_LBRACKET)
-  {
+  // If the next token is a '['
+  if (Token.token == T_LBRACKET) {
     // Skip past the '['
     scan(&Token);
 
     // Check we have an array size
-    if (Token.token == T_INTLIT)
-    {
-      // Add this as a known array and generate its spaces in assembly.
-      // We treat the array as a pointer to its element's type
-      id = addglob(Text, pointer_to(type), S_ARRAY, 0, Token.intvalue);
-      genglobsym(id);
+    if (Token.token == T_INTLIT) {
+      // Add this as a known array and generate its space in assembly.
+      // We treat the array as a pointer to its elements' type
+      if (islocal) {
+	addlocl(Text, pointer_to(type), S_ARRAY, 0, Token.intvalue);
+      } else {
+	addglob(Text, pointer_to(type), S_ARRAY, 0, Token.intvalue);
+      }
     }
-
     // Ensure we have a following ']'
     scan(&Token);
     match(T_RBRACKET, "]");
-  } 
-  else 
-  {
-    // Add it as a known identifier
+  } else {
+    // Add this as a known scalar
     // and generate its space in assembly
-    id = addglob(Text, type, S_VARIABLE, 0, 1);
-    genglobsym(id);
+    if (islocal) {
+      addlocl(Text, type, S_VARIABLE, 0, 1);
+    } else {
+      addglob(Text, type, S_VARIABLE, 0, 1);
+    }
   }
+
   // Get the trailing semicolon
   semi();
 }
+
 
 // Parse the declaration of a simplistic function.
 // The identifier has been scanned & we have the type
@@ -81,6 +94,8 @@ AST_T *function_declaration(int type) {
   endlabel = genlabel();
   nameslot = addglob(Text, type, S_FUNCTION, endlabel, 0);
   Functionid = nameslot;
+
+  genresetlocals();		// Reset position of new locals
 
   // Scan in the parentheses
   lparen();
@@ -124,15 +139,18 @@ void global_declarations(void) {
     ident();
     if (Token.token == T_LPAREN) {
 
-       // Parse the function declaration and
-       // generate the assembly code for it
-       tree = function_declaration(type);
-       if (O_dumpAST) { dumpAST(tree, NOLABEL, 0); fprintf(stdout, "\n\n"); }
-       genAST(tree, NOLABEL, 0);
+      // Parse the function declaration and
+      // generate the assembly code for it
+      tree = function_declaration(type);
+      if (O_dumpAST) {
+	dumpAST(tree, NOLABEL, 0);
+	fprintf(stdout, "\n\n");
+      }
+      genAST(tree, NOLABEL, 0);
     } else {
 
-       // Parse the global variable declaration
-       var_declaration(type);
+      // Parse the global variable declaration
+      var_declaration(type, 0);
     }
 
     // Stop when we have reached EOF

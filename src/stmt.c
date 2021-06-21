@@ -19,7 +19,8 @@ static AST_T *if_statement(void) {
   lparen();
 
   // Parse the following expression
-  // and the ')' following. Ensure
+  // and the ')' following. Force a
+  // non-comparion to be boolean
   // the tree's operation is a comparison.
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
@@ -49,7 +50,8 @@ static AST_T *while_statement(void) {
   lparen();
 
   // Parse the following expression
-  // and the ')' following. Ensure
+  // and the ')' following. Force a
+  // non-comparion to be boolean
   // the tree's operation is a comparison.
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
@@ -78,7 +80,9 @@ static AST_T *for_statement(void) {
   preopAST = single_statement();
   semi();
 
-  // Get the condition and the ';'
+  // Get the condition and the ';'.
+  // Force a non-comparison to be boolean
+  // the tree's cperation is a comparison.
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
     condAST = mkastunary(A_TOBOOL, condAST->type, condAST, 0);
@@ -110,7 +114,7 @@ static AST_T *return_statement(void) {
   AST_T *tree;
 
   // Can't return a value if function returns P_VOID
-  if (Gsym[Functionid].type == P_VOID)
+  if (Symtable[Functionid].type == P_VOID)
     fatal("Can't return from a void function");
 
   // Ensure we have 'return' '('
@@ -121,7 +125,7 @@ static AST_T *return_statement(void) {
   tree = binexpr(0);
 
   // Ensure this is compatible with the function's type
-  tree = modify_type(tree, Gsym[Functionid].type, 0);
+  tree = modify_type(tree, Symtable[Functionid].type, 0);
   if (tree == NULL)
     fatal("Incompatible type to return");
 
@@ -148,7 +152,7 @@ static AST_T *single_statement(void) {
       // XXX: These are globals at present.
       type = parse_type();
       ident();
-      var_declaration(type);
+      var_declaration(type, 1);
       return (NULL);		// No AST generated here
     case T_IF: return (if_statement());
     case T_WHILE: return (while_statement());
@@ -177,7 +181,7 @@ AST_T *compound_statement(void) {
 
     // Some statements must be followed by a semicolon
     if (tree != NULL && (tree->op == A_ASSIGN ||
-			 tree->op == A_RETURN || tree->op == A_FUNCCALL))
+			                   tree->op == A_RETURN || tree->op == A_FUNCCALL))
       semi();
 
     // For each new tree, either save it in left

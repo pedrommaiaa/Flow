@@ -14,6 +14,7 @@ static void init() {
   Line = 1;
   Putback = '\n';
   Globs = 0;
+  Locls = NSYMBOLS - 1;
   O_dumpAST = 0;
 }
 
@@ -61,10 +62,10 @@ int main(int argc, char *argv[]) {
   addglob("printint", P_CHAR, S_FUNCTION, 0, 0);
   addglob("printchar", P_VOID, S_FUNCTION, 0, 0);
 
-  scan(&Token);			// Get the first token from the input
-  genpreamble();		// Output the preamble
+  scan(&Token);			      // Get the first token from the input
+  genpreamble();		      // Output the preamble
   global_declarations();	// Parse the global declarations
-  genpostamble();		// Output the postamble
-  fclose(Outfile);		// Close the output file and exit
+  genpostamble();		      // Output the postamble
+  fclose(Outfile);		    // Close the output file and exit
   return (0);
 }

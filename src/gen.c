@@ -2,6 +2,7 @@
 #include "include/data.h"
 #include "include/decl.h"
 
+
 // Generic code generator
 
 
@@ -117,17 +118,16 @@ int genAST(AST_T *n, int label, int parentASTop) {
     rightreg = genAST(n->right, NOLABEL, n->op);
 
   switch (n->op) {
-    case A_ADD:      return (cgadd(leftreg, rightreg));
+    case A_ADD: return (cgadd(leftreg, rightreg));
     case A_SUBTRACT: return (cgsub(leftreg, rightreg));
     case A_MULTIPLY: return (cgmul(leftreg, rightreg));
-    case A_DIVIDE:   return (cgdiv(leftreg, rightreg));
+    case A_DIVIDE: return (cgdiv(leftreg, rightreg));
     
-    case A_AND:    return (cgand(leftreg, rightreg));
-    case A_OR:     return (cgor(leftreg, rightreg));
-    case A_XOR:    return (cgxor(leftreg, rightreg));
+    case A_AND: return (cgand(leftreg, rightreg));
+    case A_OR: return (cgor(leftreg, rightreg));
+    case A_XOR: return (cgxor(leftreg, rightreg));
     case A_LSHIFT: return (cgshl(leftreg, rightreg));
     case A_RSHIFT: return (cgshr(leftreg, rightreg));
-
     case A_EQ:
     case A_NE:
     case A_LT:
@@ -148,16 +148,26 @@ int genAST(AST_T *n, int label, int parentASTop) {
     case A_IDENT:
       // Load our value if we are an rvalue
       // or we are being dereferenced
-      if (n->rvalue || parentASTop== A_DEREF)
-        return (cgloadglob(n->v.id, n->op));
-      else
-        return (NOREG);
+      if (n->rvalue || parentASTop == A_DEREF) {
+	      if (Symtable[n->v.id].class == C_LOCAL) {
+	        return (cgloadlocal(n->v.id, n->op));
+	      } else {
+	        return (cgloadglob(n->v.id, n->op));
+	      }
+      } else
+	      return (NOREG);
     case A_ASSIGN:
       // Are we assigning to an identifier or through a pointer?
       switch (n->right->op) {
-        case A_IDENT: return (cgstorglob(leftreg, n->right->v.id));
-	      case A_DEREF: return (cgstorderef(leftreg, rightreg, n->right->type));
-        default: fatald("Can't A_ASSIGN in genAST(), op", n->op);
+	      case A_IDENT:
+	        if (Symtable[n->right->v.id].class == C_LOCAL)
+	          return (cgstorlocal(leftreg, n->right->v.id));
+	        else
+	          return (cgstorglob(leftreg, n->right->v.id));
+	      case A_DEREF:
+	        return (cgstorderef(leftreg, rightreg, n->right->type));
+	      default:
+	        fatald("Can't A_ASSIGN in genAST(), op", n->op);
       }
     case A_WIDEN:
       // Widen the child's type to the parent's type
@@ -173,21 +183,24 @@ int genAST(AST_T *n, int label, int parentASTop) {
       // If we are an rvalue, dereference to get the value we point at,
       // otherwise leave it for A_ASSIGN to store through the pointer
       if (n->rvalue)
-        return (cgderef(leftreg, n->left->type));
+	      return (cgderef(leftreg, n->left->type));
       else
-        return (leftreg);
+	      return (leftreg);
     case A_SCALE:
       // Small optimisation: use shift if the
       // scale value is a known power of two
       switch (n->v.size) {
-        case 2: return(cgshlconst(leftreg, 1));
-        case 4: return(cgshlconst(leftreg, 2));
-        case 8: return(cgshlconst(leftreg, 3));
-        default:
-            // Load a register with the size and
-            // multiply the leftreg by this size
-            rightreg= cgloadint(n->v.size, P_INT);
-            return (cgmul(leftreg, rightreg));
+	      case 2:
+	        return (cgshlconst(leftreg, 1));
+	      case 4:
+	        return (cgshlconst(leftreg, 2));
+	      case 8:
+	        return (cgshlconst(leftreg, 3));
+	      default:
+	      // Load a register with the size and
+	      // multiply the leftreg by this size
+	      rightreg = cgloadint(n->v.size, P_INT);
+	      return (cgmul(leftreg, rightreg));
       }
     case A_POSTINC:
       // Load the variable's value into a register,
@@ -220,29 +233,29 @@ int genAST(AST_T *n, int label, int parentASTop) {
   return (NOREG);		// Keep -Wall happy
 }
 
-
 void genpreamble() {
   cgpreamble();
 }
-
 void genpostamble() {
   cgpostamble();
 }
-
 void genfreeregs() {
   freeall_registers();
 }
-
 void genglobsym(int id) {
   cgglobsym(id);
 }
-
-int genglobstr(char *strvalue){
+int genglobstr(char *strvalue) {
   int l = genlabel();
   cgglobstr(l, strvalue);
-  return(l);
+  return (l);
 }
-
 int genprimsize(int type) {
   return (cgprimsize(type));
+}
+void genresetlocals(void) {
+  cgresetlocals();
+}
+int gengetlocaloffset(int type, int isparam) {
+  return (cggetlocaloffset(type, isparam));
 }

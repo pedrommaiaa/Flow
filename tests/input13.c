@@ -5,7 +5,7 @@ int fred() {
 void main() {
   int dummy;
   int result;
-  dummy = printint(23);
-  result = fred(10);
-  dummy = printint(result);
+  dummy= printint(23);
+  result= fred(10);
+  dummy= printint(result);
 }

@@ -8,7 +8,7 @@ if [ ! -f ../flow ]
 then echo "Need to build ../flow first!"; exit 1
 fi
 
-for i in input*
+for i in input*c
 do if [ ! -f "results/out.$i" ]
    then echo "Can't run test on $i, no output file!"
    else
