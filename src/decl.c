@@ -2,7 +2,6 @@
 #include "include/data.h"
 #include "include/decl.h"
 
-
 // Parsing of declarations
 
 
@@ -41,11 +40,16 @@ int parse_type(void) {
   return (type);
 }
 
-
+// variable_declaration: type identifier ';'
+//        | type identifier '[' INTLIT ']' ';'
+//        ;
+//
 // Parse the declaration of a scalar variable or an array
 // with a given size.
 // The identifier has been scanned & we have the type
-void var_declaration(int type, int islocal) {
+// islocal is set if this is a local variable
+// isparam is set if this local variable is a function parameter
+void var_declaration(int type, int islocal, int isparam) {
 
   // Text now has the identifier's name.
   // If the next token is a '['
@@ -58,7 +62,7 @@ void var_declaration(int type, int islocal) {
       // Add this as a known array and generate its space in assembly.
       // We treat the array as a pointer to its elements' type
       if (islocal) {
-	addlocl(Text, pointer_to(type), S_ARRAY, 0, Token.intvalue);
+	fatal("For now, declaration of local arrays is not implemented");
       } else {
 	addglob(Text, pointer_to(type), S_ARRAY, 0, Token.intvalue);
       }
@@ -70,22 +74,55 @@ void var_declaration(int type, int islocal) {
     // Add this as a known scalar
     // and generate its space in assembly
     if (islocal) {
-      addlocl(Text, type, S_VARIABLE, 0, 1);
+      if (addlocl(Text, type, S_VARIABLE, isparam, 1)==-1)
+       fatals("Duplicate local variable declaration", Text);
     } else {
       addglob(Text, type, S_VARIABLE, 0, 1);
     }
   }
-
-  // Get the trailing semicolon
-  semi();
 }
 
+// param_declaration: <null>
+//           | variable_declaration
+//           | variable_declaration ',' param_declaration
+//
+// Parse the parameters in parentheses after the function name.
+// Add them as symbols to the symbol table and return the number
+// of parameters.
+static int param_declaration(void) {
+  int type;
+  int paramcnt=0;
 
+  // Loop until the final right parentheses
+  while (Token.token != T_RPAREN) {
+    // Get the type and identifier
+    // and add it to the symbol table
+    type = parse_type();
+    ident();
+    var_declaration(type, 1, 1);
+    paramcnt++;
+
+    // Must have a ',' or ')' at this point
+    switch (Token.token) {
+      case T_COMMA: scan(&Token); break;
+      case T_RPAREN: break;
+      default:
+        fatald("Unexpected token in parameter list", Token.token);
+    }
+  }
+
+  // Return the count of parameters
+  return(paramcnt);
+}
+
+//
+// function_declaration: type identifier '(' ')' compound_statement   ;
+//
 // Parse the declaration of a simplistic function.
 // The identifier has been scanned & we have the type
-AST_T *function_declaration(int type) {
-  AST_T *tree, *finalstmt;
-  int nameslot, endlabel;
+struct ASTnode *function_declaration(int type) {
+  struct ASTnode *tree, *finalstmt;
+  int nameslot, endlabel, paramcnt;
 
   // Text now has the identifier's name.
   // Get a label-id for the end label, add the function
@@ -95,10 +132,11 @@ AST_T *function_declaration(int type) {
   nameslot = addglob(Text, type, S_FUNCTION, endlabel, 0);
   Functionid = nameslot;
 
-  genresetlocals();		// Reset position of new locals
-
-  // Scan in the parentheses
+  // Scan in the parentheses and any parameters
+  // Update the function symbol entry with the number of parameters
   lparen();
+  paramcnt= param_declaration();
+  Symtable[nameslot].nelems= paramcnt;
   rparen();
 
   // Get the AST tree for the compound statement
@@ -126,7 +164,7 @@ AST_T *function_declaration(int type) {
 // Parse one or more global declarations, either
 // variables or functions
 void global_declarations(void) {
-  AST_T *tree;
+  struct ASTnode *tree;
   int type;
 
   while (1) {
@@ -147,10 +185,16 @@ void global_declarations(void) {
 	fprintf(stdout, "\n\n");
       }
       genAST(tree, NOLABEL, 0);
+
+      // Now free the symbols associated
+      // with this function
+      freeloclsyms();
     } else {
 
       // Parse the global variable declaration
-      var_declaration(type, 0);
+      // and skip past the trailing semicolon
+      var_declaration(type, 0, 0);
+      semi();
     }
 
     // Stop when we have reached EOF

@@ -4,15 +4,14 @@
 
 // Parsing of statements
 
-
 // Prototypes
-static AST_T *single_statement(void);
+static struct ASTnode *single_statement(void);
 
 
 // Parse an IF statement including any
 // optional ELSE clause and return its AST
-static AST_T *if_statement(void) {
-  AST_T *condAST, *trueAST, *falseAST = NULL;
+static struct ASTnode *if_statement(void) {
+  struct ASTnode *condAST, *trueAST, *falseAST = NULL;
 
   // Ensure we have 'if' '('
   match(T_IF, "if");
@@ -20,7 +19,7 @@ static AST_T *if_statement(void) {
 
   // Parse the following expression
   // and the ')' following. Force a
-  // non-comparion to be boolean
+  // non-comparison to be boolean
   // the tree's operation is a comparison.
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
@@ -42,8 +41,8 @@ static AST_T *if_statement(void) {
 
 
 // Parse a WHILE statement and return its AST
-static AST_T *while_statement(void) {
-  AST_T *condAST, *bodyAST;
+static struct ASTnode *while_statement(void) {
+  struct ASTnode *condAST, *bodyAST;
 
   // Ensure we have 'while' '('
   match(T_WHILE, "while");
@@ -51,7 +50,7 @@ static AST_T *while_statement(void) {
 
   // Parse the following expression
   // and the ')' following. Force a
-  // non-comparion to be boolean
+  // non-comparison to be boolean
   // the tree's operation is a comparison.
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
@@ -67,10 +66,10 @@ static AST_T *while_statement(void) {
 
 
 // Parse a FOR statement and return its AST
-static AST_T *for_statement(void) {
-  AST_T *condAST, *bodyAST;
-  AST_T *preopAST, *postopAST;
-  AST_T *tree;
+static struct ASTnode *for_statement(void) {
+  struct ASTnode *condAST, *bodyAST;
+  struct ASTnode *preopAST, *postopAST;
+  struct ASTnode *tree;
 
   // Ensure we have 'for' '('
   match(T_FOR, "for");
@@ -82,7 +81,7 @@ static AST_T *for_statement(void) {
 
   // Get the condition and the ';'.
   // Force a non-comparison to be boolean
-  // the tree's cperation is a comparison.
+  // the tree's operation is a comparison.
   condAST = binexpr(0);
   if (condAST->op < A_EQ || condAST->op > A_GE)
     condAST = mkastunary(A_TOBOOL, condAST->type, condAST, 0);
@@ -110,8 +109,8 @@ static AST_T *for_statement(void) {
 
 
 // Parse a return statement and return its AST
-static AST_T *return_statement(void) {
-  AST_T *tree;
+static struct ASTnode *return_statement(void) {
+  struct ASTnode *tree;
 
   // Can't return a value if function returns P_VOID
   if (Symtable[Functionid].type == P_VOID)
@@ -138,7 +137,7 @@ static AST_T *return_statement(void) {
 }
 
 // Parse a single statement and return its AST
-static AST_T *single_statement(void) {
+static struct ASTnode *single_statement(void) {
   int type;
 
   switch (Token.token) {
@@ -148,16 +147,21 @@ static AST_T *single_statement(void) {
 
       // The beginning of a variable declaration.
       // Parse the type and get the identifier.
-      // Then parse the rest of the declaration.
-      // XXX: These are globals at present.
+      // Then parse the rest of the declaration
+      // and skip over the semicolon
       type = parse_type();
       ident();
-      var_declaration(type, 1);
+      var_declaration(type, 1, 0);
+      semi();
       return (NULL);		// No AST generated here
-    case T_IF: return (if_statement());
-    case T_WHILE: return (while_statement());
-    case T_FOR: return (for_statement());
-    case T_RETURN: return (return_statement());
+    case T_IF:
+      return (if_statement());
+    case T_WHILE:
+      return (while_statement());
+    case T_FOR:
+      return (for_statement());
+    case T_RETURN:
+      return (return_statement());
     default:
       // For now, see if this is an expression.
       // This catches assignment statements.
@@ -168,9 +172,9 @@ static AST_T *single_statement(void) {
 
 // Parse a compound statement
 // and return its AST
-AST_T *compound_statement(void) {
-  AST_T *left = NULL;
-  AST_T *tree;
+struct ASTnode *compound_statement(void) {
+  struct ASTnode *left = NULL;
+  struct ASTnode *tree;
 
   // Require a left curly bracket
   lbrace();
@@ -181,7 +185,7 @@ AST_T *compound_statement(void) {
 
     // Some statements must be followed by a semicolon
     if (tree != NULL && (tree->op == A_ASSIGN ||
-			                   tree->op == A_RETURN || tree->op == A_FUNCCALL))
+			 tree->op == A_RETURN || tree->op == A_FUNCCALL))
       semi();
 
     // For each new tree, either save it in left
@@ -189,11 +193,10 @@ AST_T *compound_statement(void) {
     // new tree together
     if (tree != NULL) {
       if (left == NULL)
-	      left = tree;
+	left = tree;
       else
-	      left = mkastnode(A_GLUE, P_NONE, left, NULL, tree, 0);
+	left = mkastnode(A_GLUE, P_NONE, left, NULL, tree, 0);
     }
-
     // When we hit a right curly bracket,
     // skip past it and return the AST
     if (Token.token == T_RBRACE) {

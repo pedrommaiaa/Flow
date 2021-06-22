@@ -68,8 +68,6 @@ int cgor(int r1, int r2);
 int cgxor(int r1, int r2);
 int cgshl(int r1, int r2);
 int cgshr(int r1, int r2);
-void cgresetlocals(void);
-int cggetlocaloffset(int type, int isparam);
 
 // expr.c
 AST_T *binexpr(int ptp);
@@ -95,10 +93,11 @@ int findglob(char *s);
 int findlocl(char *s);
 int findsymbol(char *s);
 int addglob(char *name, int type, int stype, int endlabel, int size);
-int addlocl(char *name, int type, int stype, int endlabel, int size);
+int addlocl(char *name, int type, int stype, int isparam, int size);
+void freeloclsyms(void);
 
 // decl.c
-void var_declaration(int type, int islocal);
+void var_declaration(int type, int islocal, int isparam);
 AST_T *function_declaration(int type);
 void global_declarations(void);
 

@@ -2,14 +2,12 @@
 #include "include/data.h"
 #include "include/decl.h"
 
-
 // Parsing of expressions
-
 
 // Parse a function call with a single expression
 // argument and return its AST
-static AST_T *funccall(void) {
-  AST_T *tree;
+static struct ASTnode *funccall(void) {
+  struct ASTnode *tree;
   int id;
 
   // Check that the identifier has been defined as a function,
@@ -35,8 +33,8 @@ static AST_T *funccall(void) {
 
 // Parse the index into an array and
 // return an AST tree for it
-static AST_T *array_access(void) {
-  AST_T *left, *right;
+static struct ASTnode *array_access(void) {
+  struct ASTnode *left, *right;
   int id;
 
   // Check that the identifier has been defined as an array
@@ -73,8 +71,8 @@ static AST_T *array_access(void) {
 // Parse a postfix expression and return
 // an AST node representing it. The
 // identifier is already in Text.
-static AST_T *postfix(void) {
-  AST_T *n;
+static struct ASTnode *postfix(void) {
+  struct ASTnode *n;
   int id;
 
   // Scan in the next token to see if we have a postfix expression
@@ -115,8 +113,8 @@ static AST_T *postfix(void) {
 
 // Parse a primary factor and return an
 // AST node representing it.
-static AST_T *primary(void) {
-  AST_T *n;
+static struct ASTnode *primary(void) {
+  struct ASTnode *n;
   int id;
 
   switch (Token.token) {
@@ -124,9 +122,9 @@ static AST_T *primary(void) {
       // For an INTLIT token, make a leaf AST node for it.
       // Make it a P_CHAR if it's within the P_CHAR range
       if ((Token.intvalue) >= 0 && (Token.intvalue < 256))
-	      n = mkastleaf(A_INTLIT, P_CHAR, Token.intvalue);
+	n = mkastleaf(A_INTLIT, P_CHAR, Token.intvalue);
       else
-	      n = mkastleaf(A_INTLIT, P_INT, Token.intvalue);
+	n = mkastleaf(A_INTLIT, P_INT, Token.intvalue);
       break;
 
     case T_STRLIT:
@@ -176,13 +174,13 @@ static int rightassoc(int tokentype) {
 // Operator precedence for each token. Must
 // match up with the order of tokens in defs.h
 static int OpPrec[] = {
-  0, 10, 20, 30,		    // T_EOF, T_ASSIGN, T_LOGOR, T_LOGAND
-  40, 50, 60,			      // T_OR, T_XOR, T_AMPER 
-  70, 70,			          // T_EQ, T_NE
-  80, 80, 80, 80,		    // T_LT, T_GT, T_LE, T_GE
-  90, 90,			          // T_LSHIFT, T_RSHIFT
-  100, 100,			        // T_PLUS, T_MINUS
-  110, 110			        // T_STAR, T_SLASH
+  0, 10, 20, 30,		// T_EOF, T_ASSIGN, T_LOGOR, T_LOGAND
+  40, 50, 60,			// T_OR, T_XOR, T_AMPER 
+  70, 70,			// T_EQ, T_NE
+  80, 80, 80, 80,		// T_LT, T_GT, T_LE, T_GE
+  90, 90,			// T_LSHIFT, T_RSHIFT
+  100, 100,			// T_PLUS, T_MINUS
+  110, 110			// T_STAR, T_SLASH
 };
 
 // Check that we have a binary operator and
@@ -197,11 +195,18 @@ static int op_precedence(int tokentype) {
   return (prec);
 }
 
+// prefix_expression: primary
+//     | '*'  prefix_expression
+//     | '&'  prefix_expression
+//     | '-'  prefix_expression
+//     | '++' prefix_expression
+//     | '--' prefix_expression
+//     ;
 
 // Parse a prefix expression and return 
 // a sub-tree representing it.
-AST_T *prefix(void) {
-  AST_T *tree;
+struct ASTnode *prefix(void) {
+  struct ASTnode *tree;
   switch (Token.token) {
     case T_AMPER:
       // Get the next token and parse it
@@ -211,7 +216,7 @@ AST_T *prefix(void) {
 
       // Ensure that it's an identifier
       if (tree->op != A_IDENT)
-	      fatal("& operator must be followed by an identifier");
+	fatal("& operator must be followed by an identifier");
 
       // Now change the operator to A_ADDR and the type to
       // a pointer to the original type
@@ -227,7 +232,7 @@ AST_T *prefix(void) {
       // For now, ensure it's either another deref or an
       // identifier
       if (tree->op != A_IDENT && tree->op != A_DEREF)
-	      fatal("* operator must be followed by an identifier or *");
+	fatal("* operator must be followed by an identifier or *");
 
       // Prepend an A_DEREF operation to the tree
       tree = mkastunary(A_DEREF, value_at(tree->type), tree, 0);
@@ -275,7 +280,7 @@ AST_T *prefix(void) {
 
       // For now, ensure it's an identifier
       if (tree->op != A_IDENT)
-	      fatal("++ operator must be followed by an identifier");
+	fatal("++ operator must be followed by an identifier");
 
       // Prepend an A_PREINC operation to the tree
       tree = mkastunary(A_PREINC, tree->type, tree, 0);
@@ -288,7 +293,7 @@ AST_T *prefix(void) {
 
       // For now, ensure it's an identifier
       if (tree->op != A_IDENT)
-	      fatal("-- operator must be followed by an identifier");
+	fatal("-- operator must be followed by an identifier");
 
       // Prepend an A_PREDEC operation to the tree
       tree = mkastunary(A_PREDEC, tree->type, tree, 0);
@@ -301,9 +306,9 @@ AST_T *prefix(void) {
 
 // Return an AST tree whose root is a binary operator.
 // Parameter ptp is the previous token's precedence.
-AST_T *binexpr(int ptp) {
-  AST_T *left, *right;
-  AST_T *ltemp, *rtemp;
+struct ASTnode *binexpr(int ptp) {
+  struct ASTnode *left, *right;
+  struct ASTnode *ltemp, *rtemp;
   int ASTop;
   int tokentype;
 
@@ -340,7 +345,7 @@ AST_T *binexpr(int ptp) {
       // Ensure the right's type matches the left
       right = modify_type(right, left->type, 0);
       if (left == NULL)
-	      fatal("Incompatible expression in assignment");
+	fatal("Incompatible expression in assignment");
 
       // Make an assignment AST tree. However, switch
       // left and right around, so that the right expression's 
@@ -360,11 +365,11 @@ AST_T *binexpr(int ptp) {
       ltemp = modify_type(left, right->type, ASTop);
       rtemp = modify_type(right, left->type, ASTop);
       if (ltemp == NULL && rtemp == NULL)
-	      fatal("Incompatible types in binary expression");
+	fatal("Incompatible types in binary expression");
       if (ltemp != NULL)
-	      left = ltemp;
+	left = ltemp;
       if (rtemp != NULL)
-	      right = rtemp;
+	right = rtemp;
     }
 
     // Join that sub-tree with ours. Convert the token
@@ -374,7 +379,8 @@ AST_T *binexpr(int ptp) {
     // Update the details of the current token.
     // If we hit a semicolon, ')' or ']', return just the left node
     tokentype = Token.token;
-    if (tokentype == T_SEMI || tokentype == T_RPAREN || tokentype == T_RBRACKET) {
+    if (tokentype == T_SEMI || tokentype == T_RPAREN
+	|| tokentype == T_RBRACKET) {
       left->rvalue = 1;
       return (left);
     }

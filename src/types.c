@@ -2,7 +2,9 @@
 #include "include/data.h"
 #include "include/decl.h"
 
+
 // Types and type handling
+
 
 // Return true if a type is an int type
 // of any size, false otherwise
@@ -25,10 +27,18 @@ int ptrtype(int type) {
 int pointer_to(int type) {
   int newtype;
   switch (type) {
-    case P_VOID: newtype = P_VOIDPTR; break;
-    case P_CHAR: newtype = P_CHARPTR; break;
-    case P_INT: newtype = P_INTPTR; break;
-    case P_LONG: newtype = P_LONGPTR; break;
+    case P_VOID:
+      newtype = P_VOIDPTR;
+      break;
+    case P_CHAR:
+      newtype = P_CHARPTR;
+      break;
+    case P_INT:
+      newtype = P_INTPTR;
+      break;
+    case P_LONG:
+      newtype = P_LONGPTR;
+      break;
     default:
       fatald("Unrecognised in pointer_to: type", type);
   }
@@ -40,10 +50,18 @@ int pointer_to(int type) {
 int value_at(int type) {
   int newtype;
   switch (type) {
-    case P_VOIDPTR: newtype = P_VOID; break;
-    case P_CHARPTR: newtype = P_CHAR; break;
-    case P_INTPTR: newtype = P_INT; break;
-    case P_LONGPTR: newtype = P_LONG; break;
+    case P_VOIDPTR:
+      newtype = P_VOID;
+      break;
+    case P_CHARPTR:
+      newtype = P_CHAR;
+      break;
+    case P_INTPTR:
+      newtype = P_INT;
+      break;
+    case P_LONGPTR:
+      newtype = P_LONG;
+      break;
     default:
       fatald("Unrecognised in value_at: type", type);
   }
@@ -56,7 +74,7 @@ int value_at(int type) {
 // if no changes occurred, a modified tree, or NULL if the
 // tree is not compatible with the given type.
 // If this will be part of a binary operation, the AST op is not zero.
-AST_T *modify_type(AST_T *tree, int rtype, int op) {
+struct ASTnode *modify_type(struct ASTnode *tree, int rtype, int op) {
   int ltype;
   int lsize, rsize;
 
@@ -94,10 +112,10 @@ AST_T *modify_type(AST_T *tree, int rtype, int op) {
     // of the original type is >1: scale the left
     if (inttype(ltype) && ptrtype(rtype)) {
       rsize = genprimsize(value_at(rtype));
-      if (rsize > 1) 
-	      return (mkastunary(A_SCALE, rtype, tree, rsize));
+      if (rsize > 1)
+	return (mkastunary(A_SCALE, rtype, tree, rsize));
       else
-        return (tree); // Size 1, no need to scale
+	return (tree);		// Size 1, no need to scale
     }
   }
   // If we get here, the types are not compatible
