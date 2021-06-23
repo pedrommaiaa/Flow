@@ -7,14 +7,14 @@
 
 
 // Build and return a generic AST node
-struct ASTnode *mkastnode(int op, int type,
-			  struct ASTnode *left,
-			  struct ASTnode *mid,
-			  struct ASTnode *right, int intvalue) {
-  struct ASTnode *n;
+AST_T *mkastnode(int op, int type,
+			  AST_T *left,
+			  AST_T *mid,
+			  AST_T *right, int intvalue) {
+  AST_T *n;
 
   // Malloc a new ASTnode
-  n = (struct ASTnode *) malloc(sizeof(struct ASTnode));
+  n = (AST_T *) malloc(sizeof(AST_T));
   if (n == NULL)
     fatal("Unable to malloc in mkastnode()");
 
@@ -30,12 +30,12 @@ struct ASTnode *mkastnode(int op, int type,
 
 
 // Make an AST leaf node
-struct ASTnode *mkastleaf(int op, int type, int intvalue) {
+AST_T *mkastleaf(int op, int type, int intvalue) {
   return (mkastnode(op, type, NULL, NULL, NULL, intvalue));
 }
 
 // Make a unary AST node: only one child
-struct ASTnode *mkastunary(int op, int type, struct ASTnode *left,
+AST_T *mkastunary(int op, int type, AST_T *left,
 			    int intvalue) {
   return (mkastnode(op, type, left, NULL, NULL, intvalue));
 }
@@ -49,7 +49,7 @@ static int gendumplabel(void) {
 
 // Given an AST tree, print it out and follow the
 // traversal of the tree that genAST() follows
-void dumpAST(struct ASTnode *n, int label, int level) {
+void dumpAST(AST_T *n, int label, int level) {
   int Lfalse, Lstart, Lend;
 
 

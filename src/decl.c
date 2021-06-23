@@ -120,8 +120,8 @@ static int param_declaration(void) {
 //
 // Parse the declaration of a simplistic function.
 // The identifier has been scanned & we have the type
-struct ASTnode *function_declaration(int type) {
-  struct ASTnode *tree, *finalstmt;
+AST_T *function_declaration(int type) {
+  AST_T *tree, *finalstmt;
   int nameslot, endlabel, paramcnt;
 
   // Text now has the identifier's name.
@@ -164,7 +164,7 @@ struct ASTnode *function_declaration(int type) {
 // Parse one or more global declarations, either
 // variables or functions
 void global_declarations(void) {
-  struct ASTnode *tree;
+  AST_T *tree;
   int type;
 
   while (1) {

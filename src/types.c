@@ -74,7 +74,7 @@ int value_at(int type) {
 // if no changes occurred, a modified tree, or NULL if the
 // tree is not compatible with the given type.
 // If this will be part of a binary operation, the AST op is not zero.
-struct ASTnode *modify_type(struct ASTnode *tree, int rtype, int op) {
+AST_T *modify_type(AST_T *tree, int rtype, int op) {
   int ltype;
   int lsize, rsize;
 

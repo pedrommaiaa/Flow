@@ -5,13 +5,13 @@
 // Parsing of statements
 
 // Prototypes
-static struct ASTnode *single_statement(void);
+static AST_T *single_statement(void);
 
 
 // Parse an IF statement including any
 // optional ELSE clause and return its AST
-static struct ASTnode *if_statement(void) {
-  struct ASTnode *condAST, *trueAST, *falseAST = NULL;
+static AST_T *if_statement(void) {
+  AST_T *condAST, *trueAST, *falseAST = NULL;
 
   // Ensure we have 'if' '('
   match(T_IF, "if");
@@ -41,8 +41,8 @@ static struct ASTnode *if_statement(void) {
 
 
 // Parse a WHILE statement and return its AST
-static struct ASTnode *while_statement(void) {
-  struct ASTnode *condAST, *bodyAST;
+static AST_T *while_statement(void) {
+  AST_T *condAST, *bodyAST;
 
   // Ensure we have 'while' '('
   match(T_WHILE, "while");
@@ -66,10 +66,10 @@ static struct ASTnode *while_statement(void) {
 
 
 // Parse a FOR statement and return its AST
-static struct ASTnode *for_statement(void) {
-  struct ASTnode *condAST, *bodyAST;
-  struct ASTnode *preopAST, *postopAST;
-  struct ASTnode *tree;
+static AST_T *for_statement(void) {
+  AST_T *condAST, *bodyAST;
+  AST_T *preopAST, *postopAST;
+  AST_T *tree;
 
   // Ensure we have 'for' '('
   match(T_FOR, "for");
@@ -109,8 +109,8 @@ static struct ASTnode *for_statement(void) {
 
 
 // Parse a return statement and return its AST
-static struct ASTnode *return_statement(void) {
-  struct ASTnode *tree;
+static AST_T *return_statement(void) {
+  AST_T *tree;
 
   // Can't return a value if function returns P_VOID
   if (Symtable[Functionid].type == P_VOID)
@@ -137,7 +137,7 @@ static struct ASTnode *return_statement(void) {
 }
 
 // Parse a single statement and return its AST
-static struct ASTnode *single_statement(void) {
+static AST_T *single_statement(void) {
   int type;
 
   switch (Token.token) {
@@ -172,9 +172,9 @@ static struct ASTnode *single_statement(void) {
 
 // Parse a compound statement
 // and return its AST
-struct ASTnode *compound_statement(void) {
-  struct ASTnode *left = NULL;
-  struct ASTnode *tree;
+AST_T *compound_statement(void) {
+  AST_T *left = NULL;
+  AST_T *tree;
 
   // Require a left curly bracket
   lbrace();

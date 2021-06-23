@@ -24,8 +24,6 @@ void genglobsym(int id);
 int genglobstr(char *strvalue);
 int genprimsize(int type);
 void genreturn(int reg, int id);
-void genresetlocals(void);
-int gengetlocaloffset(int type, int isparam);
 
 // cg.c
 void cgtextseg();
@@ -44,7 +42,8 @@ int cgsub(int r1, int r2);
 int cgmul(int r1, int r2);
 int cgdiv(int r1, int r2);
 int cgshlconst(int r, int val);
-int cgcall(int r, int id);
+int cgcall(int r, int numargs);
+void cgcopyarg(int r, int argposn);
 int cgstorglob(int r, int id);
 int cgstorlocal(int r, int id);
 void cgglobsym(int id);
