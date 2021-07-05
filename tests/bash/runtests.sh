@@ -20,27 +20,23 @@ do if [ ! -f "results/out.$i" -a ! -f "err/err.$i" ]
    # the known-good output
    else if [ -f "results/out.$i" ]
         then
-	  # Print the test name, compile it
-	  # with our compiler
+	        # Print the test name, compile it
+	        # with our compiler
           echo -n $i
-          ../flow $i
-
-	  # Assemble the output, run it
-	  # and get the output in trial.$i
-          cc -o out out.s ../lib/printint.c
+          ../flow -o out $i
           ./out > trial.$i
 
-  	  # Compare this agains the correct output
+  	      # Compare this agains the correct output
           cmp -s "out.$i" "trial.$i"
 
-	  # If different, announce failure
+	        # If different, announce failure
           # and print out the difference
           if [ "$?" -eq "1" ]
           then echo ": failed"
             diff -c "out.$i" "trial.$i"
             echo
 
-	  # No failure, so announce success
+	        # No failure, so announce success
           else echo ": OK"
           fi
 
@@ -62,5 +58,5 @@ do if [ ! -f "results/out.$i" -a ! -f "err/err.$i" ]
         fi
      fi
    fi
-   rm -f out out.s "trial.$i"
+   rm -f out out.s "input49.s" "trial.$i"
 done

@@ -5,17 +5,8 @@ flow: $(sources)
 
 clean:
 	- rm -f flow out
-	- rm -f *.o *.s src/*.o
+	- rm -f *.o *.s out src/*.o
 
 test: flow tests/bash/runtests.sh
 	(cd tests/bash; chmod +x runtests.sh; ./runtests.sh)
 
-test2: flow input27a.fl lib/printint.c
-	./flow input27a.fl
-	cc -o out out.s lib/printint.c
-	./out
-
-test3: flow tests/test.flow lib/printint.c
-	./flow tests/test.flow 
-	gcc -o out out.s lib/printint.c
-	./out
