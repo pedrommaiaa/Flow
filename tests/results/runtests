@@ -2,41 +2,39 @@
 # Run each test and compare
 # against known good output
 
-cd ../
-
 # Build our compiler if needed
-if [ ! -f ../flow ]
+if [ ! -f ../cwj ]
 then (cd ..; make)
 fi
 
 # Try to use each input source file
 for i in input*c
 # We can't do anything if there's no file to test against
-do if [ ! -f "results/out.$i" -a ! -f "err/err.$i" ]
+do if [ ! -f "out.$i" -a ! -f "err.$i" ]
    then echo "Can't run test on $i, no output file!"
 
    # Output file: compile the source, run it and
    # capture the output, and compare it against
    # the known-good output
-   else if [ -f "results/out.$i" ]
+   else if [ -f "out.$i" ]
         then
-	        # Print the test name, compile it
-	        # with our compiler
+	  # Print the test name, compile it
+	  # with our compiler
           echo -n $i
-          ../flow -o out $i
+          ../cwj -o out $i
           ./out > trial.$i
 
-  	      # Compare this agains the correct output
+  	  # Compare this agains the correct output
           cmp -s "out.$i" "trial.$i"
 
-	        # If different, announce failure
+	  # If different, announce failure
           # and print out the difference
           if [ "$?" -eq "1" ]
           then echo ": failed"
             diff -c "out.$i" "trial.$i"
             echo
 
-	        # No failure, so announce success
+	  # No failure, so announce success
           else echo ": OK"
           fi
 
@@ -44,19 +42,19 @@ do if [ ! -f "results/out.$i" -a ! -f "err/err.$i" ]
    # capture the error messages. Compare
    # against the known-bad output. Same
    # mechanism as before
-   else if [ -f "err/err.$i" ]
+   else if [ -f "err.$i" ]
         then
           echo -n $i
-          ../flow $i 2> "trial.$i"
+          ../cwj $i 2> "trial.$i"
           cmp -s "err.$i" "trial.$i"
           if [ "$?" -eq "1" ]
           then echo ": failed"
-            diff -c "err/err.$i" "trial.$i"
+            diff -c "err.$i" "trial.$i"
             echo
           else echo ": OK"
           fi
         fi
      fi
    fi
-   rm -f out out.s "input49.s" "trial.$i"
+   rm -f out out.s "trial.$i"
 done

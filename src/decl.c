@@ -3,6 +3,8 @@
 #include "include/decl.h"
 
 // Parsing of declarations
+// Copyright (c) 2019 Warren Toomey, GPL3
+
 
 // Parse the current token and return
 // a primitive type enum value. Also
@@ -62,7 +64,7 @@ void var_declaration(int type, int class) {
       if (class == C_LOCAL) {
 	fatal("For now, declaration of local arrays is not implemented");
       } else {
-	addglob(Text, pointer_to(type), S_ARRAY, class, 0, Token.intvalue);
+	addglob(Text, pointer_to(type), S_ARRAY, class, Token.intvalue);
       }
     }
     // Ensure we have a following ']'
@@ -75,7 +77,7 @@ void var_declaration(int type, int class) {
       if (addlocl(Text, type, S_VARIABLE, class, 1) == -1)
 	fatals("Duplicate local variable declaration", Text);
     } else {
-      addglob(Text, type, S_VARIABLE, class, 0, 1);
+      addglob(Text, type, S_VARIABLE, class, 1);
     }
   }
 }
@@ -148,8 +150,8 @@ static int param_declaration(int id) {
 //
 // Parse the declaration of function.
 // The identifier has been scanned & we have the type.
-AST_T *function_declaration(int type) {
-  AST_T *tree, *finalstmt;
+struct ASTnode *function_declaration(int type) {
+  struct ASTnode *tree, *finalstmt;
   int id;
   int nameslot, endlabel, paramcnt;
 
@@ -164,7 +166,7 @@ AST_T *function_declaration(int type) {
   // to the symbol table,
   if (id == -1) {
     endlabel = genlabel();
-    nameslot = addglob(Text, type, S_FUNCTION, C_GLOBAL, endlabel, 0);
+    nameslot = addglob(Text, type, S_FUNCTION, C_GLOBAL, endlabel);
   }
   // Scan in the '(', any parameters and the ')'.
   // Pass in any existing function prototype symbol slot number
@@ -216,7 +218,7 @@ AST_T *function_declaration(int type) {
 // Parse one or more global declarations, either
 // variables or functions
 void global_declarations(void) {
-  AST_T *tree;
+  struct ASTnode *tree;
   int type;
 
   while (1) {

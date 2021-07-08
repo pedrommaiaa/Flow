@@ -3,15 +3,36 @@
 #include "include/decl.h"
 
 // Parsing of statements
+// Copyright (c) 2019 Warren Toomey, GPL3
 
 // Prototypes
-static AST_T *single_statement(void);
+static struct ASTnode *single_statement(void);
+
+// compound_statement:          // empty, i.e. no statement
+//      |      statement
+//      |      statement statements
+//      ;
+//
+// statement: declaration
+//      |     expression_statement
+//      |     function_call
+//      |     if_statement
+//      |     while_statement
+//      |     for_statement
+//      |     return_statement
+//      ;
 
 
+// if_statement: if_head
+//      |        if_head 'else' compound_statement
+//      ;
+//
+// if_head: 'if' '(' true_false_expression ')' compound_statement  ;
+//
 // Parse an IF statement including any
 // optional ELSE clause and return its AST
-static AST_T *if_statement(void) {
-  AST_T *condAST, *trueAST, *falseAST = NULL;
+static struct ASTnode *if_statement(void) {
+  struct ASTnode *condAST, *trueAST, *falseAST = NULL;
 
   // Ensure we have 'if' '('
   match(T_IF, "if");
@@ -40,9 +61,11 @@ static AST_T *if_statement(void) {
 }
 
 
+// while_statement: 'while' '(' true_false_expression ')' compound_statement  ;
+//
 // Parse a WHILE statement and return its AST
-static AST_T *while_statement(void) {
-  AST_T *condAST, *bodyAST;
+static struct ASTnode *while_statement(void) {
+  struct ASTnode *condAST, *bodyAST;
 
   // Ensure we have 'while' '('
   match(T_WHILE, "while");
@@ -64,12 +87,18 @@ static AST_T *while_statement(void) {
   return (mkastnode(A_WHILE, P_NONE, condAST, NULL, bodyAST, 0));
 }
 
-
+// for_statement: 'for' '(' preop_statement ';'
+//                          true_false_expression ';'
+//                          postop_statement ')' compound_statement  ;
+//
+// preop_statement:  statement          (for now)
+// postop_statement: statement          (for now)
+//
 // Parse a FOR statement and return its AST
-static AST_T *for_statement(void) {
-  AST_T *condAST, *bodyAST;
-  AST_T *preopAST, *postopAST;
-  AST_T *tree;
+static struct ASTnode *for_statement(void) {
+  struct ASTnode *condAST, *bodyAST;
+  struct ASTnode *preopAST, *postopAST;
+  struct ASTnode *tree;
 
   // Ensure we have 'for' '('
   match(T_FOR, "for");
@@ -107,10 +136,11 @@ static AST_T *for_statement(void) {
   return (mkastnode(A_GLUE, P_NONE, preopAST, NULL, tree, 0));
 }
 
-
+// return_statement: 'return' '(' expression ')'  ;
+//
 // Parse a return statement and return its AST
-static AST_T *return_statement(void) {
-  AST_T *tree;
+static struct ASTnode *return_statement(void) {
+  struct ASTnode *tree;
 
   // Can't return a value if function returns P_VOID
   if (Symtable[Functionid].type == P_VOID)
@@ -137,44 +167,44 @@ static AST_T *return_statement(void) {
 }
 
 // Parse a single statement and return its AST
-static AST_T *single_statement(void) {
+static struct ASTnode *single_statement(void) {
   int type;
 
   switch (Token.token) {
-    case T_CHAR:
-    case T_INT:
-    case T_LONG:
+  case T_CHAR:
+  case T_INT:
+  case T_LONG:
 
-      // The beginning of a variable declaration.
-      // Parse the type and get the identifier.
-      // Then parse the rest of the declaration
-      // and skip over the semicolon
-      type = parse_type();
-      ident();
-      var_declaration(type, C_LOCAL);
-      semi();
-      return (NULL);		// No AST generated here
-    case T_IF:
-      return (if_statement());
-    case T_WHILE:
-      return (while_statement());
-    case T_FOR:
-      return (for_statement());
-    case T_RETURN:
-      return (return_statement());
-    default:
-      // For now, see if this is an expression.
-      // This catches assignment statements.
-      return (binexpr(0));
+    // The beginning of a variable declaration.
+    // Parse the type and get the identifier.
+    // Then parse the rest of the declaration
+    // and skip over the semicolon
+    type = parse_type();
+    ident();
+    var_declaration(type, C_LOCAL);
+    semi();
+    return (NULL);		// No AST generated here
+  case T_IF:
+    return (if_statement());
+  case T_WHILE:
+    return (while_statement());
+  case T_FOR:
+    return (for_statement());
+  case T_RETURN:
+    return (return_statement());
+  default:
+    // For now, see if this is an expression.
+    // This catches assignment statements.
+    return (binexpr(0));
   }
   return (NULL);		// Keep -Wall happy
 }
 
 // Parse a compound statement
 // and return its AST
-AST_T *compound_statement(void) {
-  AST_T *left = NULL;
-  AST_T *tree;
+struct ASTnode *compound_statement(void) {
+  struct ASTnode *left = NULL;
+  struct ASTnode *tree;
 
   // Require a left curly bracket
   lbrace();

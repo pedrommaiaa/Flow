@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 // Miscellaneous functions
-
+// Copyright (c) 2019 Warren Toomey, GPL3
 
 // Ensure that the current token is t,
 // and fetch the next token. Otherwise
@@ -46,7 +46,6 @@ void rparen(void) {
 void ident(void) {
   match(T_IDENT, "identifier");
 }
-
 
 // Print out fatal messages
 void fatal(char *s) {

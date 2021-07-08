@@ -1,22 +1,23 @@
 // Function prototypes for all compiler files
+// Copyright (c) 2019 Warren Toomey, GPL3
 
 // scan.c
-void reject_token(token_T *t);
-int scan(token_T *t);
+void reject_token(struct token *t);
+int scan(struct token *t);
 
 // tree.c
-AST_T *mkastnode(int op, int type,
-			  AST_T *left,
-			  AST_T *mid,
-			  AST_T *right, int intvalue);
-AST_T *mkastleaf(int op, int type, int intvalue);
-AST_T *mkastunary(int op, int type,
-			    AST_T *left, int intvalue);
-void dumpAST(AST_T *n, int label, int parentASTop);
+struct ASTnode *mkastnode(int op, int type,
+			  struct ASTnode *left,
+			  struct ASTnode *mid,
+			  struct ASTnode *right, int intvalue);
+struct ASTnode *mkastleaf(int op, int type, int intvalue);
+struct ASTnode *mkastunary(int op, int type,
+			    struct ASTnode *left, int intvalue);
+void dumpAST(struct ASTnode *n, int label, int parentASTop);
 
 // gen.c
 int genlabel(void);
-int genAST(AST_T *n, int reg, int parentASTop);
+int genAST(struct ASTnode *n, int reg, int parentASTop);
 void genpreamble();
 void genpostamble();
 void genfreeregs();
@@ -42,7 +43,7 @@ int cgsub(int r1, int r2);
 int cgmul(int r1, int r2);
 int cgdiv(int r1, int r2);
 int cgshlconst(int r, int val);
-int cgcall(int r, int numargs);
+int cgcall(int id, int numargs);
 void cgcopyarg(int r, int argposn);
 int cgstorglob(int r, int id);
 int cgstorlocal(int r, int id);
@@ -69,10 +70,10 @@ int cgshl(int r1, int r2);
 int cgshr(int r1, int r2);
 
 // expr.c
-AST_T *binexpr(int ptp);
+struct ASTnode *binexpr(int ptp);
 
 // stmt.c
-AST_T *compound_statement(void);
+struct ASTnode *compound_statement(void);
 
 // misc.c
 void match(int t, char *what);
@@ -91,7 +92,7 @@ void fatalc(char *s, int c);
 int findglob(char *s);
 int findlocl(char *s);
 int findsymbol(char *s);
-int addglob(char *name, int type, int stype, int class, int endlabel, int size);
+int addglob(char *name, int type, int stype, int class, int size);
 int addlocl(char *name, int type, int stype, int class, int size);
 void copyfuncparams(int slot);
 void freeloclsyms(void);
@@ -99,12 +100,13 @@ void clear_symtable(void);
 
 // decl.c
 void var_declaration(int type, int class);
-AST_T *function_declaration(int type);
+struct ASTnode *function_declaration(int type);
 void global_declarations(void);
 
 // types.c
 int inttype(int type);
+int ptrtype(int type);
 int parse_type(void);
 int pointer_to(int type);
 int value_at(int type);
-AST_T *modify_type(AST_T *tree, int rtype, int op);
+struct ASTnode *modify_type(struct ASTnode *tree, int rtype, int op);
