@@ -23,8 +23,8 @@ Flow is a self-compiling compiler for a subset of the C programming language.
 - [ ] Break-continue
 - [ ] Switch.
 - [ ] Else.
-- [ ] Var initialisation.
-- [ ] Local var initialisation.
+- [ ] Var initialization.
+- [ ] Local var initialization.
 - [ ] All operations.
 - [ ] Void functions.
 - [ ] Sizeof.
