@@ -1,25 +1,38 @@
 # Flow
 
-Flow is a minimal programming language inspired by C and Python. I created 
-flow with the intentions of learning more about C and programming languages in
-general, this language is for educational purposes only and should not be used
-in production.
+Flow is a self-compiling compiler for a subset of the C programming language.
 
-
-## Language Features:
-
-- [Turing-complete](https://en.wikipedia.org/wiki/Turing_completeness) language.
-- Architectures supported:
-  - x86\_64
-
-
-## Design principals
-  1. Weak, statically typed.
-  2. Imperative.
-  3. Strict.
-  4. Compiled.
-  5. General.
-  6. Manual memory management.
+## Features:
+- [x] Statements.
+- [x] If statements.
+- [x] While loops.
+- [x] For loops.
+- [x] Functions.
+- [x] Functions params.
+- [x] Functions arguments.
+- [x] Types.
+- [x] Pointers.
+- [x] Global variables.
+- [x] Local variables.
+- [x] Arrays.
+- [x] Char string literals.
+- [ ] structs.
+- [ ] Unions.
+- [ ] Enums and typedefs.
+- [ ] Preprocessor.
+- [ ] Break-continue
+- [ ] Switch.
+- [ ] Else.
+- [ ] Var initialisation.
+- [ ] Local var initialisation.
+- [ ] All operations.
+- [ ] Void functions.
+- [ ] Sizeof.
+- [ ] Static.
+- [ ] Ternary.
+- [ ] Local arrays.
+- [ ] Pointer increments.
+- [ ] Compile itself.
 
 
 ### To-Dos:
