@@ -24,5 +24,4 @@ in production.
 
 ### To-Dos:
 - [ ] Change code generator from AT&T to Intel Syntax.
-- [ ] Implement my own linker.
 - [ ] Create my own x86-64 Assembly compiler.
