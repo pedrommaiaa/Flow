@@ -39,4 +39,4 @@ Flow is a self-compiling compiler for a subset of the C programming language.
 - [ ] Change code generator from AT&T to Intel Syntax.
 - [ ] Create my own x86-64 Assembly compiler.
 
-30
+31
