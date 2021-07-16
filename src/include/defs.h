@@ -8,7 +8,6 @@
 
 enum {
   TEXTLEN=512,			// Length of symbols in input
-  NSYMBOLS=1024			// Number of symbol table entries
 };
 
 // Commands and default filenames
@@ -69,53 +68,60 @@ enum {
   P_NONE, P_VOID=16, P_CHAR=32, P_INT=48, P_LONG=64
 };
 
-// Abstract Syntax Tree structure
-struct ASTnode {
-  int op;			// "Operation" to be performed on this tree
-  int type;			// Type of any expression this tree generates
-  int rvalue;			// True if the node is an rvalue
-  struct ASTnode *left;		// Left, middle and right child trees
-  struct ASTnode *mid;
-  struct ASTnode *right;
-  union {			// For A_INTLIT, the integer value
-    int intvalue;		// For A_IDENT, the symbol slot number
-    int id;			// For A_FUNCTION, the symbol slot number
-    int size;			// For A_SCALE, the size to scale by
-  };				// For A_FUNCCALL, the symbol slot number
-};
-
-enum {
-  NOREG= -1,			// Use NOREG when the AST generation
-				// functions have no register to return
-  NOLABEL=  0			// Use NOLABEL when we have no label to
-				// pass to genAST()
-};
 
 // Structural types
 enum {
   S_VARIABLE, S_FUNCTION, S_ARRAY
 };
 
+
 // Storage classes
 enum {
         C_GLOBAL = 1,		// Globally visible symbol
-        C_LOCAL,		// Locally visible symbol
-        C_PARAM			// Locally visible function parameter
+        C_LOCAL,		    // Locally visible symbol
+        C_PARAM			    // Locally visible function parameter
 };
+
 
 // Symbol table structure
 struct symtable {
-  char *name;			// Name of a symbol
-  int type;			// Primitive type for the symbol
-  int stype;			// Structural type for the symbol
-  int class;			// Storage class for the symbol
+  char *name;			          // Name of a symbol
+  int type;			            // Primitive type for the symbol
+  int stype;			          // Structural type for the symbol
+  int class;			          // Storage class for the symbol
   union {
-    int size;			// Number of elements in the symbol
-    int endlabel;		// For functions, the end label
+    int size;			          // Number of elements in the symbol
+    int endlabel;		        // For functions, the end label
   };
   union {
-    int nelems;			// For functions, # of params
-    int posn;			// For locals, the negative offset
-				// from the stack base pointer
+    int nelems;			        // For functions, # of params
+    int posn;			          // For locals, the negative offset
+				                    // from the stack base pointer
   };
+  struct symtable *next;    // Next symbol in one list
+  struct symtable *member;  // First member of a function, struct
+                            // union or enum 
+};
+
+
+// Abstract Syntax Tree structure
+struct ASTnode {
+  int op;			              // "Operation" to be performed on this tree
+  int type;			            // Type of any expression this tree generates
+  int rvalue;			          // True if the node is an rvalue
+  struct ASTnode *left;		  // Left, middle and right child trees
+  struct ASTnode *mid;
+  struct ASTnode *right;
+  struct symtable *sym;     // For many AST nodes, the pointer to
+  union {			              // the symbol in the symbol table
+    int intvalue;		        // For A_INTLIT, the integer value 
+    int size;			          // For A_SCALE, the size to scale by
+  };	
+};
+
+enum {
+  NOREG= -1,			          // Use NOREG when the AST generation
+				                    // functions have no register to return
+  NOLABEL=  0			          // Use NOLABEL when we have no label to
+				                    // pass to genAST()
 };
