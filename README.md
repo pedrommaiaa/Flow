@@ -34,9 +34,15 @@ Flow is a self-compiling compiler for a subset of the C programming language.
 - [ ] Pointer increments.
 - [ ] Compile itself.
 
+## Usage
+
+`make flow` to create the compiler
+`./flow file1` to test the compiler
+`make tests` to execute tests
+`make clean` to clean up everything
+
+
 
 ### To-Dos:
 - [ ] Change code generator from AT&T to Intel Syntax.
-- [ ] Create my own x86-64 Assembly compiler.
-
-31
+- [ ] Create my own x86-64 Assembly compiler.31.
