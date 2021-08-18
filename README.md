@@ -37,7 +37,7 @@ Flow is a self-compiling compiler for a subset of the C programming language.
 ## Usage
 
 - `make flow` to create the compiler.  
-- `./flow file1` to test the compiler.  
+- `./flow file1` to use the compiler.  
 - `make tests` to execute tests.  
 - `make clean` to clean up everything.  
 
